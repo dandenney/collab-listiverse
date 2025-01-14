@@ -33,10 +33,10 @@ export function ShoppingList() {
       // Basic URL validation
       new URL(newUrl);
       
-      // Fetch metadata using microlink and handle type assertion
+      // Fetch metadata using microlink
       const response = await mql(newUrl);
-      // Cast the response to include data property
-      const metadata = (response as { data: Metadata }).data;
+      // First cast to unknown, then to our expected type
+      const metadata = (response as unknown as { data: Metadata }).data;
       
       const newItem: ShoppingItem = {
         id: crypto.randomUUID(),
