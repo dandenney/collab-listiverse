@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { microlink } from '@microlink/react';
+import mql from '@microlink/mql';
 
 interface ShoppingItem {
   id: string;
@@ -28,7 +28,7 @@ export function ShoppingList() {
       new URL(newUrl);
       
       // Fetch metadata using microlink
-      const { status, data } = await microlink(newUrl);
+      const { status, data } = await mql(newUrl);
       
       if (status === 'success') {
         const newItem: ShoppingItem = {
@@ -57,10 +57,6 @@ export function ShoppingList() {
     setItems(items.map(item => 
       item.id === id ? { ...item, completed: !item.completed } : item
     ));
-  };
-
-  const openUrl = (url: string) => {
-    window.open(url, '_blank');
   };
 
   return (
