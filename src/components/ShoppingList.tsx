@@ -3,12 +3,14 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { microlink } from '@microlink/react';
 
 interface ShoppingItem {
   id: string;
   url: string;
   title: string;
+  description?: string;
   completed: boolean;
 }
 
@@ -25,20 +27,26 @@ export function ShoppingList() {
       // Basic URL validation
       new URL(newUrl);
       
-      // In a real implementation, we would fetch metadata from the URL here
-      // For now, we'll just use the URL as the title
-      const newItem: ShoppingItem = {
-        id: crypto.randomUUID(),
-        url: newUrl.trim(),
-        title: new URL(newUrl).hostname,
-        completed: false
-      };
+      // Fetch metadata using microlink
+      const { status, data } = await microlink(newUrl);
       
-      setItems([...items, newItem]);
-      setNewUrl("");
+      if (status === 'success') {
+        const newItem: ShoppingItem = {
+          id: crypto.randomUUID(),
+          url: newUrl.trim(),
+          title: data.title || new URL(newUrl).hostname,
+          description: data.description,
+          completed: false
+        };
+        
+        setItems([...items, newItem]);
+        setNewUrl("");
+      } else {
+        throw new Error('Failed to fetch metadata');
+      }
     } catch (error) {
       toast({
-        title: "Invalid URL",
+        title: "Error adding item",
         description: "Please enter a valid URL",
         variant: "destructive"
       });
@@ -79,25 +87,40 @@ export function ShoppingList() {
         {items.map((item) => (
           <Card
             key={item.id}
-            className={`p-4 cursor-pointer transition-colors hover:bg-accent/5 ${
+            className={`p-4 ${
               item.completed ? "bg-muted" : ""
             }`}
-            onClick={() => openUrl(item.url)}
           >
-            <div className="flex items-center justify-between">
-              <span className={item.completed ? "line-through text-muted-foreground" : ""}>
-                {item.title}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleItem(item.id);
-                }}
-              >
-                {item.completed ? "Mark Incomplete" : "Mark Complete"}
-              </Button>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <a 
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`text-blue-600 hover:underline ${
+                    item.completed ? "line-through text-muted-foreground" : ""
+                  }`}
+                >
+                  {item.title}
+                </a>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleItem(item.id);
+                  }}
+                >
+                  {item.completed ? "Mark Incomplete" : "Mark Complete"}
+                </Button>
+              </div>
+              {item.description && (
+                <p className={`text-sm text-muted-foreground ${
+                  item.completed ? "line-through" : ""
+                }`}>
+                  {item.description}
+                </p>
+              )}
             </div>
           </Card>
         ))}
