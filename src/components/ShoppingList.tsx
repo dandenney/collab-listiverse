@@ -14,8 +14,8 @@ interface ShoppingItem {
   completed: boolean;
 }
 
-// Define the correct type structure for MQL response
-interface MQLData {
+// Define the type for the metadata we expect from mql
+interface Metadata {
   title?: string;
   description?: string;
 }
@@ -33,9 +33,10 @@ export function ShoppingList() {
       // Basic URL validation
       new URL(newUrl);
       
-      // Fetch metadata using microlink
+      // Fetch metadata using microlink and handle type assertion
       const response = await mql(newUrl);
-      const metadata = response.data;
+      // Cast the response to include data property
+      const metadata = (response as { data: Metadata }).data;
       
       const newItem: ShoppingItem = {
         id: crypto.randomUUID(),
