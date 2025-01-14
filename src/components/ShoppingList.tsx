@@ -20,12 +20,6 @@ interface MQLData {
   description?: string;
 }
 
-interface MQLResponse {
-  data: MQLData;
-  response: Response;
-  url: string;
-}
-
 export function ShoppingList() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [newUrl, setNewUrl] = useState("");
@@ -39,8 +33,8 @@ export function ShoppingList() {
       // Basic URL validation
       new URL(newUrl);
       
-      // Fetch metadata using microlink with proper typing
-      const { data } = await mql<MQLResponse>(newUrl);
+      // Fetch metadata using microlink
+      const { data } = await mql(newUrl);
       
       const newItem: ShoppingItem = {
         id: crypto.randomUUID(),
