@@ -14,6 +14,16 @@ interface ShoppingItem {
   completed: boolean;
 }
 
+interface MQLResponse {
+  data: {
+    status: string;
+    data: {
+      title?: string;
+      description?: string;
+    };
+  };
+}
+
 export function ShoppingList() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [newUrl, setNewUrl] = useState("");
@@ -28,14 +38,14 @@ export function ShoppingList() {
       new URL(newUrl);
       
       // Fetch metadata using microlink
-      const { data: response } = await mql(newUrl);
+      const { data } = (await mql(newUrl)) as MQLResponse;
       
-      if (response.status === 'success') {
+      if (data.status === 'success') {
         const newItem: ShoppingItem = {
           id: crypto.randomUUID(),
           url: newUrl.trim(),
-          title: response.data.title || new URL(newUrl).hostname,
-          description: response.data.description,
+          title: data.data.title || new URL(newUrl).hostname,
+          description: data.data.description,
           completed: false
         };
         
