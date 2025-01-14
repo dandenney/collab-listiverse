@@ -34,13 +34,13 @@ export function ShoppingList() {
       new URL(newUrl);
       
       // Fetch metadata using microlink
-      const { data: response } = await mql(newUrl);
+      const response = await mql(newUrl);
       
       const newItem: ShoppingItem = {
         id: crypto.randomUUID(),
         url: newUrl.trim(),
-        title: response.title || new URL(newUrl).hostname,
-        description: response.description,
+        title: response.data.title || new URL(newUrl).hostname,
+        description: response.data.description,
         completed: false
       };
       
