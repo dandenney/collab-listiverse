@@ -15,13 +15,9 @@ interface ShoppingItem {
 }
 
 interface MQLResponse {
-  data: {
-    status: string;
-    data: {
-      title?: string;
-      description?: string;
-    };
-  };
+  status: string;
+  title?: string;
+  description?: string;
 }
 
 export function ShoppingList() {
@@ -38,22 +34,18 @@ export function ShoppingList() {
       new URL(newUrl);
       
       // Fetch metadata using microlink
-      const { data } = (await mql(newUrl)) as MQLResponse;
+      const { data: response } = await mql(newUrl);
       
-      if (data.status === 'success') {
-        const newItem: ShoppingItem = {
-          id: crypto.randomUUID(),
-          url: newUrl.trim(),
-          title: data.data.title || new URL(newUrl).hostname,
-          description: data.data.description,
-          completed: false
-        };
-        
-        setItems([...items, newItem]);
-        setNewUrl("");
-      } else {
-        throw new Error('Failed to fetch metadata');
-      }
+      const newItem: ShoppingItem = {
+        id: crypto.randomUUID(),
+        url: newUrl.trim(),
+        title: response.title || new URL(newUrl).hostname,
+        description: response.description,
+        completed: false
+      };
+      
+      setItems([...items, newItem]);
+      setNewUrl("");
     } catch (error) {
       toast({
         title: "Error adding item",
