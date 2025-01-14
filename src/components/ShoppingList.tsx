@@ -14,10 +14,16 @@ interface ShoppingItem {
   completed: boolean;
 }
 
-interface MQLResponse {
-  status: string;
+// Define the correct type structure for MQL response
+interface MQLData {
   title?: string;
   description?: string;
+}
+
+interface MQLResponse {
+  data: MQLData;
+  response: Response;
+  url: string;
 }
 
 export function ShoppingList() {
@@ -33,14 +39,14 @@ export function ShoppingList() {
       // Basic URL validation
       new URL(newUrl);
       
-      // Fetch metadata using microlink
-      const response = await mql(newUrl);
+      // Fetch metadata using microlink with proper typing
+      const { data } = await mql<MQLResponse>(newUrl);
       
       const newItem: ShoppingItem = {
         id: crypto.randomUUID(),
         url: newUrl.trim(),
-        title: response.data.title || new URL(newUrl).hostname,
-        description: response.data.description,
+        title: data.title || new URL(newUrl).hostname,
+        description: data.description,
         completed: false
       };
       
