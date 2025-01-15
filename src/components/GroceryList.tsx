@@ -1,18 +1,23 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useListItems } from "@/hooks/useListItems";
+import { useToast } from "@/hooks/use-toast";
 
 export function GroceryList() {
   const [newItem, setNewItem] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
+  const { toast } = useToast();
+
   const {
     query: { data: items = [] },
     addItemMutation,
     toggleItemMutation,
-  } = useListItems("grocery", false);
+    archiveCompletedMutation,
+  } = useListItems("grocery", showArchived);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,23 +43,57 @@ export function GroceryList() {
     }
   };
 
+  const archiveCompleted = () => {
+    const completedItems = items.filter(item => item.completed);
+    if (completedItems.length === 0) {
+      toast({
+        title: "No items to archive",
+        description: "Complete some items first!",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    archiveCompletedMutation.mutate();
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Grocery List</h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowArchived(!showArchived)}
+          >
+            {showArchived ? "Show Active" : "Show Archived"}
+          </Button>
+          {!showArchived && (
+            <Button
+              variant="outline"
+              onClick={archiveCompleted}
+              className="flex items-center gap-2"
+            >
+              <Archive className="w-4 h-4" />
+              Archive Completed
+            </Button>
+          )}
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
-        <Input
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          placeholder="Add an item..."
-          className="flex-1"
-        />
-        <Button type="submit" size="icon">
-          <Plus className="h-4 w-4" />
-        </Button>
-      </form>
+      {!showArchived && (
+        <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
+          <Input
+            value={newItem}
+            onChange={(e) => setNewItem(e.target.value)}
+            placeholder="Add an item..."
+            className="flex-1"
+          />
+          <Button type="submit" size="icon">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </form>
+      )}
 
       <div className="space-y-2">
         {items.map((item) => (
