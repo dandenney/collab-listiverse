@@ -65,7 +65,6 @@ export function GroceryList() {
           <Button
             variant="ghost"
             onClick={() => setShowArchived(!showArchived)}
-            className="hover:bg-accent hover:text-accent-foreground"
           >
             {showArchived ? "Show Active" : "Show Archived"}
           </Button>
@@ -73,7 +72,7 @@ export function GroceryList() {
             <Button
               variant="ghost"
               onClick={archiveCompleted}
-              className="flex items-center gap-2 hover:bg-accent hover:text-accent-foreground"
+              className="flex items-center gap-2"
             >
               <Archive className="w-4 h-4" />
               Archive Completed
@@ -90,7 +89,7 @@ export function GroceryList() {
             placeholder="Add an item..."
             className="flex-1"
           />
-          <Button type="submit" size="icon" variant="ghost" className="hover:bg-accent hover:text-accent-foreground">
+          <Button type="submit" size="icon" variant="ghost">
             <Plus className="h-4 w-4" />
           </Button>
         </form>
