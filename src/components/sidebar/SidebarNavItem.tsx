@@ -24,6 +24,7 @@ export function SidebarNavItem({ path, title, icon: Icon }: SidebarNavItemProps)
       <SidebarMenuButton
         className={`
           text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground
+          h-11 md:h-9
           ${isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""}
         `}
         onClick={handleClick}
