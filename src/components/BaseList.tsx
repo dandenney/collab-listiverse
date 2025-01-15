@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { Archive } from "lucide-react";
 import { BaseItem, PendingItem, Tag } from "@/types/list";
 import { AddItemForm } from "./list/AddItemForm";
 import { ItemEditor } from "./list/ItemEditor";
 import { ListItem } from "./list/ListItem";
+import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface BaseListProps {
   title: string;
@@ -25,6 +28,7 @@ export function BaseList({
 }: BaseListProps) {
   const [items, setItems] = useState<BaseItem[]>([]);
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
+  const { toast } = useToast();
 
   const handlePendingItem = (item: PendingItem) => {
     setPendingItem(item);
@@ -50,15 +54,49 @@ export function BaseList({
   };
 
   const toggleItem = (id: string) => {
-    setItems(items.map(item => 
+    const updatedItems = items.map(item => 
       item.id === id ? { ...item, completed: !item.completed } : item
-    ));
+    );
+    setItems(updatedItems);
+    
+    const toggledItem = updatedItems.find(item => item.id === id);
+    if (toggledItem) {
+      onSaveItem(toggledItem);
+      toast({
+        title: toggledItem.completed ? "Item Completed" : "Item Uncompleted",
+        description: toggledItem.title
+      });
+    }
   };
 
   const updateItemNotes = (id: string, notes: string) => {
-    setItems(items.map(item => 
+    const updatedItems = items.map(item => 
       item.id === id ? { ...item, notes } : item
-    ));
+    );
+    setItems(updatedItems);
+    
+    const updatedItem = updatedItems.find(item => item.id === id);
+    if (updatedItem) {
+      onSaveItem(updatedItem);
+    }
+  };
+
+  const archiveCompleted = () => {
+    const completedItems = items.filter(item => item.completed);
+    if (completedItems.length === 0) {
+      toast({
+        title: "No items to archive",
+        description: "Complete some items first!",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setItems(items.filter(item => !item.completed));
+    toast({
+      title: "Items Archived",
+      description: `${completedItems.length} items have been archived`
+    });
   };
 
   // Sort items: dated items first (sorted by date), then undated items
@@ -74,6 +112,14 @@ export function BaseList({
     <div className="max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{title}</h1>
+        <Button
+          variant="outline"
+          onClick={archiveCompleted}
+          className="flex items-center gap-2"
+        >
+          <Archive className="w-4 h-4" />
+          Archive Completed
+        </Button>
       </div>
 
       <AddItemForm 
