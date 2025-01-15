@@ -72,7 +72,8 @@ export function BaseList({
       title: pendingItem.title,
       description: pendingItem.description,
       completed: false,
-      tags: pendingItem.tags
+      tags: pendingItem.tags,
+      date: pendingItem.date
     };
     
     setItems([...items, newItem]);
@@ -111,6 +112,14 @@ export function BaseList({
       tags: (pendingItem.tags || []).filter(t => t !== tagName)
     });
   };
+
+  // Sort items: dated items first (sorted by date), then undated items
+  const sortedItems = [...items].sort((a, b) => {
+    if (a.date && b.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
+    if (a.date) return -1;
+    if (b.date) return 1;
+    return 0;
+  });
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -160,6 +169,17 @@ export function BaseList({
                 })}
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Date</label>
+              <Input 
+                type="date"
+                value={pendingItem.date || ""}
+                onChange={(e) => setPendingItem({
+                  ...pendingItem,
+                  date: e.target.value
+                })}
+              />
+            </div>
             {availableTags.length > 0 && (
               <div>
                 <label className="block text-sm font-medium mb-1">Tags</label>
@@ -206,7 +226,7 @@ export function BaseList({
       )}
 
       <div className="space-y-2">
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Card
             key={item.id}
             className={`p-4 ${
@@ -215,16 +235,23 @@ export function BaseList({
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <a 
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`text-blue-600 hover:underline ${
-                    item.completed ? "line-through text-muted-foreground" : ""
-                  }`}
-                >
-                  {item.title}
-                </a>
+                <div className="flex-1">
+                  <a 
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`text-blue-600 hover:underline ${
+                      item.completed ? "line-through text-muted-foreground" : ""
+                    }`}
+                  >
+                    {item.title}
+                  </a>
+                  {item.date && (
+                    <div className="text-sm text-muted-foreground">
+                      {new Date(item.date).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"

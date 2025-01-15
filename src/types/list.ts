@@ -5,6 +5,7 @@ export interface BaseItem {
   description?: string;
   completed: boolean;
   tags?: string[];
+  date?: string;
 }
 
 export interface Metadata {
@@ -17,6 +18,7 @@ export interface PendingItem {
   title: string;
   description?: string;
   tags?: string[];
+  date?: string;
 }
 
 export interface Tag {
