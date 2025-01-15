@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { GroceryList } from "./components/GroceryList";
 import { ShoppingList } from "./components/ShoppingList";
+import { WatchList } from "./components/WatchList";
+import { ReadList } from "./components/ReadList";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,8 @@ const App = () => (
             <Route path="/" element={<Navigate to="/grocery" replace />} />
             <Route path="/grocery" element={<GroceryList />} />
             <Route path="/shopping" element={<ShoppingList />} />
+            <Route path="/watch" element={<WatchList />} />
+            <Route path="/read" element={<ReadList />} />
             {/* Other routes will be added as we implement them */}
             <Route path="*" element={<Navigate to="/grocery" replace />} />
           </Routes>
