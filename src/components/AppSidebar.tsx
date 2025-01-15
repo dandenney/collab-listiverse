@@ -37,13 +37,16 @@ export function AppSidebar() {
     <Sidebar className="bg-sidebar border-r border-sidebar-border">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Lists</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/70">Lists</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                    className={location.pathname === item.path ? "bg-accent/10" : ""}
+                    className={`
+                      text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground
+                      ${location.pathname === item.path ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""}
+                    `}
                     onClick={() => navigate(item.path)}
                   >
                     <item.icon className="w-5 h-5" />
