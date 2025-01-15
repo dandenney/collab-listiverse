@@ -46,7 +46,7 @@ export function ListItem({
       className={`p-4 ${item.completed ? "bg-muted" : ""}`}
     >
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <div className="flex-1">
             <a 
               href={item.url}
@@ -64,7 +64,7 @@ export function ListItem({
               </div>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-start sm:self-center">
             <Button
               variant="ghost"
               size="sm"
