@@ -4,11 +4,12 @@ export function GroceryList() {
   return (
     <BaseList
       title="Grocery List"
-      urlPlaceholder="Enter item details..."
+      urlPlaceholder="Enter item name..."
       completeButtonText="Mark Complete"
       uncompleteButtonText="Mark Incomplete"
       listType="grocery"
       showDate={false}
+      isUrlRequired={false}
     />
   );
 }

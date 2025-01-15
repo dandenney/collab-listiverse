@@ -16,6 +16,7 @@ interface BaseListProps {
   uncompleteButtonText: string;
   listType: ListType;
   showDate?: boolean;
+  isUrlRequired?: boolean;
 }
 
 export function BaseList({
@@ -24,7 +25,8 @@ export function BaseList({
   completeButtonText,
   uncompleteButtonText,
   listType,
-  showDate = false
+  showDate = false,
+  isUrlRequired = true
 }: BaseListProps) {
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
   const [showArchived, setShowArchived] = useState(false);
@@ -119,6 +121,7 @@ export function BaseList({
           <AddItemForm 
             urlPlaceholder={urlPlaceholder}
             onPendingItem={handlePendingItem}
+            isUrlRequired={isUrlRequired}
           />
 
           {pendingItem && (

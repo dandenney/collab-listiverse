@@ -9,35 +9,46 @@ import { PendingItem, Metadata } from "@/types/list";
 interface AddItemFormProps {
   urlPlaceholder: string;
   onPendingItem: (item: PendingItem) => void;
+  isUrlRequired?: boolean;
 }
 
-export function AddItemForm({ urlPlaceholder, onPendingItem }: AddItemFormProps) {
+export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = true }: AddItemFormProps) {
   const [newUrl, setNewUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const fetchMetadata = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUrl.trim()) return;
 
     setIsLoading(true);
     try {
-      new URL(newUrl);
-      const response = await mql(newUrl);
-      const metadata = (response as unknown as { data: Metadata }).data;
-      
-      onPendingItem({
-        url: newUrl.trim(),
-        title: metadata.title || new URL(newUrl).hostname,
-        description: metadata.description,
-        tags: []
-      });
+      if (isUrlRequired) {
+        new URL(newUrl);
+        const response = await mql(newUrl);
+        const metadata = (response as unknown as { data: Metadata }).data;
+        
+        onPendingItem({
+          url: newUrl.trim(),
+          title: metadata.title || new URL(newUrl).hostname,
+          description: metadata.description,
+          tags: []
+        });
+      } else {
+        // For non-URL items (like grocery items), use the input as the title
+        onPendingItem({
+          url: "",
+          title: newUrl.trim(),
+          description: "",
+          tags: []
+        });
+      }
       
       setNewUrl("");
     } catch (error) {
       toast({
-        title: "Error fetching metadata",
-        description: "Please enter a valid URL",
+        title: isUrlRequired ? "Error fetching metadata" : "Error adding item",
+        description: isUrlRequired ? "Please enter a valid URL" : "Please try again",
         variant: "destructive"
       });
     } finally {
@@ -46,12 +57,12 @@ export function AddItemForm({ urlPlaceholder, onPendingItem }: AddItemFormProps)
   };
 
   return (
-    <form onSubmit={fetchMetadata} className="flex gap-2 mb-6">
+    <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
       <Input
         value={newUrl}
         onChange={(e) => setNewUrl(e.target.value)}
         placeholder={urlPlaceholder}
-        type="url"
+        type={isUrlRequired ? "url" : "text"}
         className="flex-1"
         disabled={isLoading}
       />
@@ -61,7 +72,7 @@ export function AddItemForm({ urlPlaceholder, onPendingItem }: AddItemFormProps)
         ) : (
           <Plus className="w-4 h-4" />
         )}
-        {isLoading ? "Fetching..." : "Fetch"}
+        {isLoading ? "Adding..." : "Add"}
       </Button>
     </form>
   );
