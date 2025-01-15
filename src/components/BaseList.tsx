@@ -27,7 +27,9 @@ export function BaseList({
   showDate = false
 }: BaseListProps) {
   const [items, setItems] = useState<BaseItem[]>([]);
+  const [archivedItems, setArchivedItems] = useState<BaseItem[]>([]);
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const { toast } = useToast();
 
   const handlePendingItem = (item: PendingItem) => {
@@ -92,6 +94,7 @@ export function BaseList({
       return;
     }
     
+    setArchivedItems([...archivedItems, ...completedItems]);
     setItems(items.filter(item => !item.completed));
     toast({
       title: "Items Archived",
@@ -100,7 +103,7 @@ export function BaseList({
   };
 
   // Sort items: dated items first (sorted by date), then undated items
-  const sortedItems = [...items].sort((a, b) => {
+  const sortedItems = [...(showArchived ? archivedItems : items)].sort((a, b) => {
     if (!showDate) return 0;
     if (a.date && b.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
     if (a.date) return -1;
@@ -112,29 +115,43 @@ export function BaseList({
     <div className="max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{title}</h1>
-        <Button
-          variant="outline"
-          onClick={archiveCompleted}
-          className="flex items-center gap-2"
-        >
-          <Archive className="w-4 h-4" />
-          Archive Completed
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowArchived(!showArchived)}
+          >
+            {showArchived ? "Show Active" : "Show Archived"}
+          </Button>
+          {!showArchived && (
+            <Button
+              variant="outline"
+              onClick={archiveCompleted}
+              className="flex items-center gap-2"
+            >
+              <Archive className="w-4 h-4" />
+              Archive Completed
+            </Button>
+          )}
+        </div>
       </div>
 
-      <AddItemForm 
-        urlPlaceholder={urlPlaceholder}
-        onPendingItem={handlePendingItem}
-      />
+      {!showArchived && (
+        <>
+          <AddItemForm 
+            urlPlaceholder={urlPlaceholder}
+            onPendingItem={handlePendingItem}
+          />
 
-      {pendingItem && (
-        <ItemEditor
-          pendingItem={pendingItem}
-          onPendingItemChange={setPendingItem}
-          onSave={savePendingItem}
-          availableTags={availableTags}
-          showDate={showDate}
-        />
+          {pendingItem && (
+            <ItemEditor
+              pendingItem={pendingItem}
+              onPendingItemChange={setPendingItem}
+              onSave={savePendingItem}
+              availableTags={availableTags}
+              showDate={showDate}
+            />
+          )}
+        </>
       )}
 
       <div className="space-y-2">
@@ -144,8 +161,8 @@ export function BaseList({
             item={item}
             completeButtonText={completeButtonText}
             uncompleteButtonText={uncompleteButtonText}
-            onToggle={toggleItem}
-            onNotesChange={updateItemNotes}
+            onToggle={!showArchived ? toggleItem : undefined}
+            onNotesChange={!showArchived ? updateItemNotes : undefined}
             showDate={showDate}
           />
         ))}
