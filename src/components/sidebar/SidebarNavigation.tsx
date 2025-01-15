@@ -20,7 +20,7 @@ const navigationItems = [
   { path: "/watch", title: "Watch", icon: Film },
   { path: "/read", title: "Read", icon: BookOpen },
   { path: "/local", title: "Local", icon: MapPin },
-  { path: "/recipe", title: "Recipe", icon: UtensilsCrossed },
+  { path: "/recipes", title: "Recipe", icon: UtensilsCrossed }, // Updated path to match App.tsx
 ];
 
 export function SidebarNavigation() {
