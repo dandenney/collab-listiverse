@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { BaseItem } from "@/types/list";
+import { BaseItem, ListType } from "@/types/list";
 import { useToast } from "@/hooks/use-toast";
 
-export function useListItems(listType: string, showArchived: boolean) {
+export function useListItems(listType: ListType, showArchived: boolean) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

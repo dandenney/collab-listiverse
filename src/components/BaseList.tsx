@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Archive } from "lucide-react";
-import { BaseItem, PendingItem } from "@/types/list";
+import { BaseItem, PendingItem, Tag, ListType } from "@/types/list";
 import { AddItemForm } from "./list/AddItemForm";
 import { ItemEditor } from "./list/ItemEditor";
 import { ListItem } from "./list/ListItem";
@@ -14,7 +14,7 @@ interface BaseListProps {
   completeButtonText: string;
   uncompleteButtonText: string;
   onSaveItem: (item: BaseItem) => void;
-  listType: 'grocery' | 'shopping' | 'watch' | 'read' | 'local' | 'recipe';
+  listType: ListType;
   availableTags?: Tag[];
   showDate?: boolean;
 }

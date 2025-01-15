@@ -28,3 +28,5 @@ export interface Tag {
   name: string;
   color?: string;
 }
+
+export type ListType = 'grocery' | 'shopping' | 'watch' | 'read' | 'local' | 'recipe';
