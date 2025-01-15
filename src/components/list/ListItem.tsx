@@ -62,7 +62,7 @@ export function ListItem({
               {item.title}
             </a>
             {showDate && item.date && (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm font-medium text-foreground/90 mt-1">
                 {new Date(item.date).toLocaleDateString()}
               </div>
             )}
