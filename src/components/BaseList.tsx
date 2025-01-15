@@ -93,8 +93,8 @@ export function BaseList({
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">{title}</h1>
         <div className="flex gap-2">
           <Button

@@ -8,13 +8,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 overflow-x-hidden">
           <div className="md:hidden mb-4">
             <SidebarTrigger>
               <Menu className="h-6 w-6" />
             </SidebarTrigger>
           </div>
-          {children}
+          <div className="max-w-full">
+            {children}
+          </div>
         </main>
       </div>
     </SidebarProvider>
