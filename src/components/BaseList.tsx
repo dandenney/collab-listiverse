@@ -49,6 +49,21 @@ export function BaseList({
   const savePendingItem = () => {
     if (!pendingItem) return;
 
+    // If there's a date, ensure we're using local midnight
+    let itemDate = pendingItem.date;
+    if (itemDate) {
+      const date = new Date(itemDate);
+      // Create date at local midnight
+      itemDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        0, 0, 0
+      ).toISOString();
+      console.log('Original date:', pendingItem.date);
+      console.log('Adjusted date:', itemDate);
+    }
+
     addItemMutation.mutate({
       id: crypto.randomUUID(),
       url: pendingItem.url,
@@ -56,7 +71,7 @@ export function BaseList({
       description: pendingItem.description,
       completed: false,
       tags: pendingItem.tags,
-      date: showDate ? pendingItem.date : undefined,
+      date: itemDate,
       notes: pendingItem.notes || ""
     });
     
