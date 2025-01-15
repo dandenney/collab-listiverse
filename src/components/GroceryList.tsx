@@ -2,7 +2,7 @@ import { BaseList } from "./BaseList";
 import { BaseItem } from "@/types/list";
 
 export function GroceryList() {
-  const handleSaveItem = (item: BaseItem) => {
+  const handleSaveItem = async (item: BaseItem) => {
     console.log("Saved grocery item:", item);
   };
 
