@@ -174,7 +174,7 @@ export function BaseList({
               )}
             </div>
           </Card>
-        )}
+        ))}
       </div>
     </div>
   );
