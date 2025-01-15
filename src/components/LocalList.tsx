@@ -123,6 +123,7 @@ export function LocalList() {
         uncompleteButtonText="Mark Incomplete"
         onSaveItem={handleSaveItem}
         availableTags={tags}
+        showDate={true}
       />
     </div>
   );
