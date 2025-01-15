@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -13,12 +13,14 @@ interface AddItemFormProps {
 
 export function AddItemForm({ urlPlaceholder, onPendingItem }: AddItemFormProps) {
   const [newUrl, setNewUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const fetchMetadata = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUrl.trim()) return;
 
+    setIsLoading(true);
     try {
       new URL(newUrl);
       const response = await mql(newUrl);
@@ -38,6 +40,8 @@ export function AddItemForm({ urlPlaceholder, onPendingItem }: AddItemFormProps)
         description: "Please enter a valid URL",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,10 +53,15 @@ export function AddItemForm({ urlPlaceholder, onPendingItem }: AddItemFormProps)
         placeholder={urlPlaceholder}
         type="url"
         className="flex-1"
+        disabled={isLoading}
       />
-      <Button type="submit" className="flex items-center gap-2">
-        <Plus className="w-4 h-4" />
-        Fetch
+      <Button type="submit" className="flex items-center gap-2" disabled={isLoading}>
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Plus className="w-4 h-4" />
+        )}
+        {isLoading ? "Fetching..." : "Fetch"}
       </Button>
     </form>
   );
