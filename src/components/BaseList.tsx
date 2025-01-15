@@ -49,18 +49,17 @@ export function BaseList({
   const savePendingItem = () => {
     if (!pendingItem) return;
 
-    // If there's a date, ensure we're using local midnight
+    // If there's a date, ensure we're using the correct timezone offset
     let itemDate = pendingItem.date;
     if (itemDate) {
       const date = new Date(itemDate);
-      // Create date at local midnight
-      itemDate = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        0, 0, 0
-      ).toISOString();
+      // Get local timezone offset in minutes
+      const timezoneOffset = date.getTimezoneOffset();
+      // Create new date and adjust for timezone
+      const adjustedDate = new Date(date.getTime() + timezoneOffset * 60000);
+      itemDate = adjustedDate.toISOString();
       console.log('Original date:', pendingItem.date);
+      console.log('Timezone offset (minutes):', timezoneOffset);
       console.log('Adjusted date:', itemDate);
     }
 
