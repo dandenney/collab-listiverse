@@ -44,6 +44,17 @@ export function ListItem({
     }
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    // Create a new date using the local date components to avoid timezone shifts
+    const localDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+    return localDate.toLocaleDateString();
+  };
+
   return (
     <Card
       className={`p-4 ${item.completed ? "bg-muted" : ""}`}
@@ -63,7 +74,7 @@ export function ListItem({
             </a>
             {showDate && item.date && (
               <div className="text-sm font-medium text-foreground/90 mt-1">
-                {new Date(item.date).toLocaleDateString()}
+                {formatDate(item.date)}
               </div>
             )}
           </div>
