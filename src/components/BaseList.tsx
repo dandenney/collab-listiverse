@@ -99,6 +99,7 @@ export function BaseList({
         <div className="flex gap-2">
           <Button
             variant="outline"
+            className="hover:bg-accent hover:text-accent-foreground"
             onClick={() => setShowArchived(!showArchived)}
           >
             {showArchived ? "Show Active" : "Show Archived"}
@@ -107,7 +108,7 @@ export function BaseList({
             <Button
               variant="outline"
               onClick={archiveCompleted}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:bg-accent hover:text-accent-foreground"
             >
               <Archive className="w-4 h-4" />
               Archive Completed
