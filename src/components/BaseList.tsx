@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Tag as TagIcon, X } from "lucide-react";
+import { Plus, Tag as TagIcon, X, Edit2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -35,6 +35,8 @@ export function BaseList({
   const [items, setItems] = useState<BaseItem[]>([]);
   const [newUrl, setNewUrl] = useState("");
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingNotes, setEditingNotes] = useState("");
   const { toast } = useToast();
 
   const fetchMetadata = async (e: React.FormEvent) => {
@@ -73,7 +75,8 @@ export function BaseList({
       description: pendingItem.description,
       completed: false,
       tags: pendingItem.tags,
-      date: pendingItem.date
+      date: pendingItem.date,
+      notes: pendingItem.notes || ""
     };
     
     setItems([...items, newItem]);
@@ -89,6 +92,22 @@ export function BaseList({
     setItems(items.map(item => 
       item.id === id ? { ...item, completed: !item.completed } : item
     ));
+  };
+
+  const startEditingNotes = (item: BaseItem) => {
+    setEditingItemId(item.id);
+    setEditingNotes(item.notes || "");
+  };
+
+  const saveNotes = (id: string) => {
+    setItems(items.map(item => 
+      item.id === id ? { ...item, notes: editingNotes } : item
+    ));
+    setEditingItemId(null);
+    toast({
+      title: "Notes saved",
+      description: "Your notes have been updated"
+    });
   };
 
   const addTagToPendingItem = (tagId: string) => {
@@ -180,6 +199,17 @@ export function BaseList({
                 })}
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Notes</label>
+              <Textarea 
+                value={pendingItem.notes || ""}
+                onChange={(e) => setPendingItem({
+                  ...pendingItem,
+                  notes: e.target.value
+                })}
+                placeholder="Add your notes here..."
+              />
+            </div>
             {availableTags.length > 0 && (
               <div>
                 <label className="block text-sm font-medium mb-1">Tags</label>
@@ -252,16 +282,25 @@ export function BaseList({
                     </div>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toggleItem(item.id);
-                  }}
-                >
-                  {item.completed ? uncompleteButtonText : completeButtonText}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => startEditingNotes(item)}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleItem(item.id);
+                    }}
+                  >
+                    {item.completed ? uncompleteButtonText : completeButtonText}
+                  </Button>
+                </div>
               </div>
               {item.description && (
                 <p className={`text-sm text-muted-foreground ${
@@ -269,6 +308,28 @@ export function BaseList({
                 }`}>
                   {item.description}
                 </p>
+              )}
+              {editingItemId === item.id ? (
+                <div className="mt-2 space-y-2">
+                  <Textarea
+                    value={editingNotes}
+                    onChange={(e) => setEditingNotes(e.target.value)}
+                    placeholder="Add your notes here..."
+                    className="min-h-[100px]"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => saveNotes(item.id)}
+                    className="flex items-center gap-2"
+                  >
+                    <Check className="w-4 h-4" />
+                    Save Notes
+                  </Button>
+                </div>
+              ) : item.notes && (
+                <div className="mt-2 p-3 bg-muted rounded-md">
+                  <p className="text-sm whitespace-pre-wrap">{item.notes}</p>
+                </div>
               )}
               {item.tags && item.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
