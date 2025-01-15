@@ -7,15 +7,14 @@ import { ListItem } from "./list/ListItem";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useListItems } from "@/hooks/useListItems";
+import { useTags } from "@/hooks/useTags";
 
 interface BaseListProps {
   title: string;
   urlPlaceholder: string;
   completeButtonText: string;
   uncompleteButtonText: string;
-  onSaveItem: (item: BaseItem) => void;
   listType: ListType;
-  availableTags?: Tag[];
   showDate?: boolean;
 }
 
@@ -25,7 +24,6 @@ export function BaseList({
   completeButtonText,
   uncompleteButtonText,
   listType,
-  availableTags = [],
   showDate = false
 }: BaseListProps) {
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
@@ -33,12 +31,14 @@ export function BaseList({
   const { toast } = useToast();
 
   const {
-    query: { data: items = [], isLoading },
+    query: { data: items = [], isLoading: isLoadingItems },
     addItemMutation,
     toggleItemMutation,
     updateNotesMutation,
     archiveCompletedMutation
   } = useListItems(listType, showArchived);
+
+  const { data: tags = [], isLoading: isLoadingTags } = useTags();
 
   const handlePendingItem = (item: PendingItem) => {
     setPendingItem(item);
@@ -86,7 +86,7 @@ export function BaseList({
     archiveCompletedMutation.mutate();
   };
 
-  if (isLoading) {
+  if (isLoadingItems || isLoadingTags) {
     return <div>Loading...</div>;
   }
 
@@ -126,7 +126,7 @@ export function BaseList({
               pendingItem={pendingItem}
               onPendingItemChange={setPendingItem}
               onSave={savePendingItem}
-              availableTags={availableTags}
+              availableTags={tags}
               showDate={showDate}
             />
           )}

@@ -10,21 +10,36 @@ export function useListItems(listType: ListType, showArchived: boolean) {
   const query = useQuery({
     queryKey: ['items', listType, showArchived],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: items, error: itemsError } = await supabase
         .from('list_items')
-        .select('*')
+        .select(`
+          *,
+          item_tags (
+            tag_id,
+            tags (
+              name,
+              color
+            )
+          )
+        `)
         .eq('type', listType)
         .eq('archived', showArchived)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (itemsError) throw itemsError;
+
+      // Transform the data to match our BaseItem interface
+      return items.map((item: any) => ({
+        ...item,
+        tags: item.item_tags?.map((it: any) => it.tags.name) || []
+      }));
     }
   });
 
   const addItemMutation = useMutation({
     mutationFn: async (newItem: BaseItem) => {
-      const { data, error } = await supabase
+      // First insert the list item
+      const { data: item, error: itemError } = await supabase
         .from('list_items')
         .insert([{
           type: listType,
@@ -39,8 +54,32 @@ export function useListItems(listType: ListType, showArchived: boolean) {
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (itemError) throw itemError;
+
+      // If there are tags, get their IDs and create item_tags relationships
+      if (newItem.tags && newItem.tags.length > 0) {
+        const { data: tags, error: tagsError } = await supabase
+          .from('tags')
+          .select('id, name')
+          .in('name', newItem.tags);
+
+        if (tagsError) throw tagsError;
+
+        if (tags && tags.length > 0) {
+          const itemTags = tags.map(tag => ({
+            item_id: item.id,
+            tag_id: tag.id
+          }));
+
+          const { error: itemTagsError } = await supabase
+            .from('item_tags')
+            .insert(itemTags);
+
+          if (itemTagsError) throw itemTagsError;
+        }
+      }
+
+      return item;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
