@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Edit2, Check, Tag as TagIcon } from "lucide-react";
+import { Edit2, Check, Tag as TagIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { BaseItem } from "@/types/list";
 import { useToast } from "@/hooks/use-toast";
 
@@ -10,8 +10,8 @@ interface ListItemProps {
   item: BaseItem;
   completeButtonText: string;
   uncompleteButtonText: string;
-  onToggle: (id: string) => void;
-  onNotesChange: (id: string, notes: string) => void;
+  onToggle?: (id: string) => void;
+  onNotesChange?: (id: string, notes: string) => void;
   showDate?: boolean;
 }
 
@@ -25,6 +25,7 @@ export function ListItem({
 }: ListItemProps) {
   const [editingNotes, setEditingNotes] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
 
   const startEditing = () => {
@@ -33,12 +34,14 @@ export function ListItem({
   };
 
   const saveNotes = () => {
-    onNotesChange(item.id, editingNotes);
-    setIsEditing(false);
-    toast({
-      title: "Notes saved",
-      description: "Your notes have been updated"
-    });
+    if (onNotesChange) {
+      onNotesChange(item.id, editingNotes);
+      setIsEditing(false);
+      toast({
+        title: "Notes saved",
+        description: "Your notes have been updated"
+      });
+    }
   };
 
   return (
@@ -65,31 +68,52 @@ export function ListItem({
             )}
           </div>
           <div className="flex gap-2 self-start sm:self-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={startEditing}
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                onToggle(item.id);
-              }}
-            >
-              {item.completed ? uncompleteButtonText : completeButtonText}
-            </Button>
+            {onNotesChange && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={startEditing}
+              >
+                <Edit2 className="w-4 h-4" />
+              </Button>
+            )}
+            {onToggle && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onToggle(item.id);
+                }}
+              >
+                {item.completed ? uncompleteButtonText : completeButtonText}
+              </Button>
+            )}
           </div>
         </div>
         {item.description && (
-          <p className={`text-sm text-muted-foreground ${
-            item.completed ? "line-through" : ""
-          }`}>
-            {item.description}
-          </p>
+          <div>
+            <p className={`text-sm text-muted-foreground ${
+              item.completed ? "line-through" : ""
+            } ${!isExpanded ? "line-clamp-4" : ""}`}>
+              {item.description}
+            </p>
+            {item.description.split('\n').length > 4 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="mt-1 h-6 px-2"
+              >
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4 mr-1" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 mr-1" />
+                )}
+                {isExpanded ? "Show Less" : "Show More"}
+              </Button>
+            )}
+          </div>
         )}
         {isEditing ? (
           <div className="mt-2 space-y-2">
