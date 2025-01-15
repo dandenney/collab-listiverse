@@ -13,6 +13,7 @@ export function ReadList() {
       completeButtonText="Mark Read"
       uncompleteButtonText="Mark Unread"
       onSaveItem={handleSaveItem}
+      listType="read"
       showDate={false}
     />
   );

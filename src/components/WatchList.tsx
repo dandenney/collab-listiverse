@@ -13,6 +13,7 @@ export function WatchList() {
       completeButtonText="Mark Watched"
       uncompleteButtonText="Mark Unwatched"
       onSaveItem={handleSaveItem}
+      listType="watch"
       showDate={false}
     />
   );

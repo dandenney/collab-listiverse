@@ -1,4 +1,5 @@
 import { BaseList } from "./BaseList";
+import { BaseItem } from "@/types/list";
 
 const recipeTags = [
   { id: "breakfast", name: "Breakfast", color: "bg-yellow-500" },
@@ -18,6 +19,7 @@ export function RecipeList() {
       urlPlaceholder="Enter recipe URL..."
       completeButtonText="Made it!"
       uncompleteButtonText="Make again"
+      listType="recipe"
       availableTags={recipeTags}
       onSaveItem={(item) => {
         console.log("Saved recipe:", item);

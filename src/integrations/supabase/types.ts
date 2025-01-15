@@ -9,6 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      item_tags: {
+        Row: {
+          item_id: string
+          tag_id: string
+        }
+        Insert: {
+          item_id: string
+          tag_id: string
+        }
+        Update: {
+          item_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_tags_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "list_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      list_items: {
+        Row: {
+          archived: boolean
+          completed: boolean
+          created_at: string
+          date: string | null
+          description: string | null
+          id: string
+          notes: string | null
+          title: string
+          type: Database["public"]["Enums"]["list_type"]
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          completed?: boolean
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          id?: string
+          notes?: string | null
+          title: string
+          type: Database["public"]["Enums"]["list_type"]
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          archived?: boolean
+          completed?: boolean
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          id?: string
+          notes?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["list_type"]
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -30,6 +105,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -38,7 +137,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      list_type: "grocery" | "shopping" | "watch" | "read" | "local" | "recipe"
     }
     CompositeTypes: {
       [_ in never]: never

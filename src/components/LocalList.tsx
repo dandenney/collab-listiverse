@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BaseList } from "./BaseList";
 import { BaseItem, Tag } from "@/types/list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X, Tag as TagIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -14,13 +16,64 @@ import {
 } from "@/components/ui/dialog";
 
 export function LocalList() {
-  const [tags, setTags] = useState<Tag[]>([
-    { id: "1", name: "Important", color: "bg-red-500" },
-    { id: "2", name: "Later", color: "bg-yellow-500" },
-    { id: "3", name: "Reference", color: "bg-blue-500" },
-  ]);
   const [newTag, setNewTag] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: tags = [] } = useQuery({
+    queryKey: ['tags'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tags')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const addTagMutation = useMutation({
+    mutationFn: async (tagName: string) => {
+      const { data, error } = await supabase
+        .from('tags')
+        .insert([{
+          name: tagName,
+          color: `bg-${['red', 'yellow', 'blue', 'green', 'purple'][Math.floor(Math.random() * 5)]}-500`,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      toast({
+        title: "Tag added",
+        description: "The new tag has been created"
+      });
+    }
+  });
+
+  const removeTagMutation = useMutation({
+    mutationFn: async (tagId: string) => {
+      const { error } = await supabase
+        .from('tags')
+        .delete()
+        .eq('id', tagId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      toast({
+        title: "Tag removed",
+        description: "The tag has been deleted"
+      });
+    }
+  });
 
   const handleSaveItem = (item: BaseItem) => {
     console.log("Saved local item:", item);
@@ -42,26 +95,12 @@ export function LocalList() {
       return;
     }
 
-    const tag: Tag = {
-      id: crypto.randomUUID(),
-      name: newTag.trim(),
-      color: `bg-${['red', 'yellow', 'blue', 'green', 'purple'][Math.floor(Math.random() * 5)]}-500`
-    };
-
-    setTags([...tags, tag]);
+    addTagMutation.mutate(newTag.trim());
     setNewTag("");
-    toast({
-      title: "Tag added",
-      description: "The new tag has been created"
-    });
   };
 
   const removeTag = (id: string) => {
-    setTags(tags.filter(tag => tag.id !== id));
-    toast({
-      title: "Tag removed",
-      description: "The tag has been deleted"
-    });
+    removeTagMutation.mutate(id);
   };
 
   return (
@@ -122,6 +161,7 @@ export function LocalList() {
         completeButtonText="Mark Complete"
         uncompleteButtonText="Mark Incomplete"
         onSaveItem={handleSaveItem}
+        listType="local"
         availableTags={tags}
         showDate={true}
       />

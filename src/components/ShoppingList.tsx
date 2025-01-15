@@ -13,6 +13,7 @@ export function ShoppingList() {
       completeButtonText="Mark Complete"
       uncompleteButtonText="Mark Incomplete"
       onSaveItem={handleSaveItem}
+      listType="shopping"
       showDate={false}
     />
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Archive } from "lucide-react";
 import { BaseItem, PendingItem, Tag } from "@/types/list";
 import { AddItemForm } from "./list/AddItemForm";
@@ -6,6 +6,8 @@ import { ItemEditor } from "./list/ItemEditor";
 import { ListItem } from "./list/ListItem";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface BaseListProps {
   title: string;
@@ -13,6 +15,7 @@ interface BaseListProps {
   completeButtonText: string;
   uncompleteButtonText: string;
   onSaveItem: (item: BaseItem) => void;
+  listType: 'grocery' | 'shopping' | 'watch' | 'read' | 'local' | 'recipe';
   availableTags?: Tag[];
   showDate?: boolean;
 }
@@ -22,15 +25,128 @@ export function BaseList({
   urlPlaceholder,
   completeButtonText,
   uncompleteButtonText,
-  onSaveItem,
+  listType,
   availableTags = [],
   showDate = false
 }: BaseListProps) {
-  const [items, setItems] = useState<BaseItem[]>([]);
-  const [archivedItems, setArchivedItems] = useState<BaseItem[]>([]);
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch items
+  const { data: items = [] } = useQuery({
+    queryKey: ['items', listType, showArchived],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('list_items')
+        .select('*')
+        .eq('type', listType)
+        .eq('archived', showArchived)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Add item mutation
+  const addItemMutation = useMutation({
+    mutationFn: async (newItem: BaseItem) => {
+      const { data, error } = await supabase
+        .from('list_items')
+        .insert([{
+          type: listType,
+          url: newItem.url,
+          title: newItem.title,
+          description: newItem.description,
+          completed: false,
+          notes: newItem.notes,
+          date: newItem.date,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      toast({
+        title: "Item Added",
+        description: "Your item has been added to the list"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to add item: " + error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Toggle item mutation
+  const toggleItemMutation = useMutation({
+    mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
+      const { data, error } = await supabase
+        .from('list_items')
+        .update({ completed })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      toast({
+        title: data.completed ? "Item Completed" : "Item Uncompleted",
+        description: data.title
+      });
+    }
+  });
+
+  // Update notes mutation
+  const updateNotesMutation = useMutation({
+    mutationFn: async ({ id, notes }: { id: string; notes: string }) => {
+      const { error } = await supabase
+        .from('list_items')
+        .update({ notes })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      toast({
+        title: "Notes Updated",
+        description: "Your notes have been saved"
+      });
+    }
+  });
+
+  // Archive completed items mutation
+  const archiveCompletedMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('list_items')
+        .update({ archived: true })
+        .eq('type', listType)
+        .eq('completed', true);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      toast({
+        title: "Items Archived",
+        description: "Completed items have been archived"
+      });
+    }
+  });
 
   const handlePendingItem = (item: PendingItem) => {
     setPendingItem(item);
@@ -39,7 +155,7 @@ export function BaseList({
   const savePendingItem = () => {
     if (!pendingItem) return;
 
-    const newItem: BaseItem = {
+    addItemMutation.mutate({
       id: crypto.randomUUID(),
       url: pendingItem.url,
       title: pendingItem.title,
@@ -48,39 +164,20 @@ export function BaseList({
       tags: pendingItem.tags,
       date: showDate ? pendingItem.date : undefined,
       notes: pendingItem.notes || ""
-    };
+    });
     
-    setItems([...items, newItem]);
-    onSaveItem(newItem);
     setPendingItem(null);
   };
 
   const toggleItem = (id: string) => {
-    const updatedItems = items.map(item => 
-      item.id === id ? { ...item, completed: !item.completed } : item
-    );
-    setItems(updatedItems);
-    
-    const toggledItem = updatedItems.find(item => item.id === id);
-    if (toggledItem) {
-      onSaveItem(toggledItem);
-      toast({
-        title: toggledItem.completed ? "Item Completed" : "Item Uncompleted",
-        description: toggledItem.title
-      });
+    const item = items.find(item => item.id === id);
+    if (item) {
+      toggleItemMutation.mutate({ id, completed: !item.completed });
     }
   };
 
   const updateItemNotes = (id: string, notes: string) => {
-    const updatedItems = items.map(item => 
-      item.id === id ? { ...item, notes } : item
-    );
-    setItems(updatedItems);
-    
-    const updatedItem = updatedItems.find(item => item.id === id);
-    if (updatedItem) {
-      onSaveItem(updatedItem);
-    }
+    updateNotesMutation.mutate({ id, notes });
   };
 
   const archiveCompleted = () => {
@@ -94,22 +191,8 @@ export function BaseList({
       return;
     }
     
-    setArchivedItems([...archivedItems, ...completedItems]);
-    setItems(items.filter(item => !item.completed));
-    toast({
-      title: "Items Archived",
-      description: `${completedItems.length} items have been archived`
-    });
+    archiveCompletedMutation.mutate();
   };
-
-  // Sort items: dated items first (sorted by date), then undated items
-  const sortedItems = [...(showArchived ? archivedItems : items)].sort((a, b) => {
-    if (!showDate) return 0;
-    if (a.date && b.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
-    if (a.date) return -1;
-    if (b.date) return 1;
-    return 0;
-  });
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -155,7 +238,7 @@ export function BaseList({
       )}
 
       <div className="space-y-2">
-        {sortedItems.map((item) => (
+        {items.map((item) => (
           <ListItem
             key={item.id}
             item={item}
