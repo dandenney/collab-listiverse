@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { BaseList } from "./BaseList";
-import { BaseItem, Tag } from "@/types/list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X, Tag as TagIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -19,19 +18,6 @@ export function LocalList() {
   const [newTag, setNewTag] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const { data: tags = [] } = useQuery({
-    queryKey: ['tags'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tags')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
 
   const addTagMutation = useMutation({
     mutationFn: async (tagName: string) => {
@@ -75,26 +61,9 @@ export function LocalList() {
     }
   });
 
-  const handleSaveItem = (item: BaseItem) => {
-    console.log("Saved local item:", item);
-  };
-
   const addTag = () => {
     if (!newTag.trim()) return;
     
-    const tagExists = tags.some(tag => 
-      tag.name.toLowerCase() === newTag.trim().toLowerCase()
-    );
-
-    if (tagExists) {
-      toast({
-        title: "Tag already exists",
-        description: "Please use a different tag name",
-        variant: "destructive"
-      });
-      return;
-    }
-
     addTagMutation.mutate(newTag.trim());
     setNewTag("");
   };
@@ -160,9 +129,7 @@ export function LocalList() {
         urlPlaceholder="Enter URL..."
         completeButtonText="Mark Complete"
         uncompleteButtonText="Mark Incomplete"
-        onSaveItem={handleSaveItem}
         listType="local"
-        availableTags={tags}
         showDate={true}
       />
     </div>
