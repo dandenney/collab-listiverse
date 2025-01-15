@@ -17,13 +17,15 @@ interface ItemEditorProps {
   onPendingItemChange: (item: PendingItem) => void;
   onSave: () => void;
   availableTags?: Tag[];
+  showDate?: boolean;
 }
 
 export function ItemEditor({ 
   pendingItem, 
   onPendingItemChange, 
   onSave,
-  availableTags = []
+  availableTags = [],
+  showDate = false
 }: ItemEditorProps) {
   const addTag = (tagId: string) => {
     const tag = availableTags.find(t => t.id === tagId);
@@ -73,17 +75,19 @@ export function ItemEditor({
             })}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Date</label>
-          <Input 
-            type="date"
-            value={pendingItem.date || ""}
-            onChange={(e) => onPendingItemChange({
-              ...pendingItem,
-              date: e.target.value
-            })}
-          />
-        </div>
+        {showDate && (
+          <div>
+            <label className="block text-sm font-medium mb-1">Date</label>
+            <Input 
+              type="date"
+              value={pendingItem.date || ""}
+              onChange={(e) => onPendingItemChange({
+                ...pendingItem,
+                date: e.target.value
+              })}
+            />
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium mb-1">Notes</label>
           <Textarea 

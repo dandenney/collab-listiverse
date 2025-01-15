@@ -3,7 +3,6 @@ import { BaseItem } from "@/types/list";
 
 export function ReadList() {
   const handleSaveItem = (item: BaseItem) => {
-    // Add any read-specific save logic here
     console.log("Saved read item:", item);
   };
 
@@ -14,6 +13,7 @@ export function ReadList() {
       completeButtonText="Mark Read"
       uncompleteButtonText="Mark Unread"
       onSaveItem={handleSaveItem}
+      showDate={false}
     />
   );
 }

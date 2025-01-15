@@ -11,6 +11,7 @@ interface BaseListProps {
   uncompleteButtonText: string;
   onSaveItem: (item: BaseItem) => void;
   availableTags?: Tag[];
+  showDate?: boolean;
 }
 
 export function BaseList({
@@ -19,7 +20,8 @@ export function BaseList({
   completeButtonText,
   uncompleteButtonText,
   onSaveItem,
-  availableTags = []
+  availableTags = [],
+  showDate = false
 }: BaseListProps) {
   const [items, setItems] = useState<BaseItem[]>([]);
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
@@ -38,7 +40,7 @@ export function BaseList({
       description: pendingItem.description,
       completed: false,
       tags: pendingItem.tags,
-      date: pendingItem.date,
+      date: showDate ? pendingItem.date : undefined,
       notes: pendingItem.notes || ""
     };
     
@@ -61,6 +63,7 @@ export function BaseList({
 
   // Sort items: dated items first (sorted by date), then undated items
   const sortedItems = [...items].sort((a, b) => {
+    if (!showDate) return 0;
     if (a.date && b.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
     if (a.date) return -1;
     if (b.date) return 1;
@@ -84,6 +87,7 @@ export function BaseList({
           onPendingItemChange={setPendingItem}
           onSave={savePendingItem}
           availableTags={availableTags}
+          showDate={showDate}
         />
       )}
 
@@ -96,6 +100,7 @@ export function BaseList({
             uncompleteButtonText={uncompleteButtonText}
             onToggle={toggleItem}
             onNotesChange={updateItemNotes}
+            showDate={showDate}
           />
         ))}
       </div>

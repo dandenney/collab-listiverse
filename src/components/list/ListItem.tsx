@@ -12,6 +12,7 @@ interface ListItemProps {
   uncompleteButtonText: string;
   onToggle: (id: string) => void;
   onNotesChange: (id: string, notes: string) => void;
+  showDate?: boolean;
 }
 
 export function ListItem({
@@ -19,7 +20,8 @@ export function ListItem({
   completeButtonText,
   uncompleteButtonText,
   onToggle,
-  onNotesChange
+  onNotesChange,
+  showDate = false
 }: ListItemProps) {
   const [editingNotes, setEditingNotes] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -56,7 +58,7 @@ export function ListItem({
             >
               {item.title}
             </a>
-            {item.date && (
+            {showDate && item.date && (
               <div className="text-sm text-muted-foreground">
                 {new Date(item.date).toLocaleDateString()}
               </div>
