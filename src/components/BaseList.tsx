@@ -35,7 +35,7 @@ export function BaseList({
   const queryClient = useQueryClient();
 
   // Fetch items
-  const { data: items = [] } = useQuery({
+  const { data: items = [], isLoading } = useQuery({
     queryKey: ['items', listType, showArchived],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -193,6 +193,10 @@ export function BaseList({
     
     archiveCompletedMutation.mutate();
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="max-w-2xl mx-auto">

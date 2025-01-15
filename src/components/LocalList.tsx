@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BaseList } from "./BaseList";
 import { BaseItem, Tag } from "@/types/list";
 import { Button } from "@/components/ui/button";
