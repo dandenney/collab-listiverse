@@ -6,6 +6,7 @@ import { Plus, X, Tag as TagIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTags } from "@/hooks/useTags";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ export function LocalList() {
   const [newTag, setNewTag] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: tags = [] } = useTags();
 
   const addTagMutation = useMutation({
     mutationFn: async (tagName: string) => {
