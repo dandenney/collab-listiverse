@@ -8,6 +8,7 @@ import { GroceryList } from "./components/GroceryList";
 import { ShoppingList } from "./components/ShoppingList";
 import { WatchList } from "./components/WatchList";
 import { ReadList } from "./components/ReadList";
+import { LocalList } from "./components/LocalList";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/shopping" element={<ShoppingList />} />
             <Route path="/watch" element={<WatchList />} />
             <Route path="/read" element={<ReadList />} />
+            <Route path="/local" element={<LocalList />} />
             {/* Other routes will be added as we implement them */}
             <Route path="*" element={<Navigate to="/grocery" replace />} />
           </Routes>

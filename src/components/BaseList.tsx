@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Tag as TagIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import mql from '@microlink/mql';
-import { BaseItem, Metadata, PendingItem } from "@/types/list";
+import { BaseItem, Metadata, PendingItem, Tag } from "@/types/list";
 
 interface BaseListProps {
   title: string;
@@ -14,6 +21,7 @@ interface BaseListProps {
   completeButtonText: string;
   uncompleteButtonText: string;
   onSaveItem: (item: BaseItem) => void;
+  availableTags?: Tag[];
 }
 
 export function BaseList({
@@ -21,7 +29,8 @@ export function BaseList({
   urlPlaceholder,
   completeButtonText,
   uncompleteButtonText,
-  onSaveItem
+  onSaveItem,
+  availableTags = []
 }: BaseListProps) {
   const [items, setItems] = useState<BaseItem[]>([]);
   const [newUrl, setNewUrl] = useState("");
@@ -40,7 +49,8 @@ export function BaseList({
       setPendingItem({
         url: newUrl.trim(),
         title: metadata.title || new URL(newUrl).hostname,
-        description: metadata.description
+        description: metadata.description,
+        tags: []
       });
       
       setNewUrl("");
@@ -61,7 +71,8 @@ export function BaseList({
       url: pendingItem.url,
       title: pendingItem.title,
       description: pendingItem.description,
-      completed: false
+      completed: false,
+      tags: pendingItem.tags
     };
     
     setItems([...items, newItem]);
@@ -77,6 +88,28 @@ export function BaseList({
     setItems(items.map(item => 
       item.id === id ? { ...item, completed: !item.completed } : item
     ));
+  };
+
+  const addTagToPendingItem = (tagId: string) => {
+    if (!pendingItem) return;
+    const tag = availableTags.find(t => t.id === tagId);
+    if (!tag) return;
+
+    const currentTags = pendingItem.tags || [];
+    if (currentTags.includes(tag.name)) return;
+
+    setPendingItem({
+      ...pendingItem,
+      tags: [...currentTags, tag.name]
+    });
+  };
+
+  const removeTagFromPendingItem = (tagName: string) => {
+    if (!pendingItem) return;
+    setPendingItem({
+      ...pendingItem,
+      tags: (pendingItem.tags || []).filter(t => t !== tagName)
+    });
   };
 
   return (
@@ -127,6 +160,44 @@ export function BaseList({
                 })}
               />
             </div>
+            {availableTags.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium mb-1">Tags</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(pendingItem.tags || []).map((tag) => (
+                    <div
+                      key={tag}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10"
+                    >
+                      <span className="text-sm">{tag}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0"
+                        onClick={() => removeTagFromPendingItem(tag)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <Select onValueChange={addTagToPendingItem}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Add tag..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableTags.map((tag) => (
+                      <SelectItem key={tag.id} value={tag.id}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${tag.color}`} />
+                          {tag.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <Button onClick={savePendingItem} className="w-full">
               Save to List
             </Button>
@@ -171,6 +242,19 @@ export function BaseList({
                 }`}>
                   {item.description}
                 </p>
+              )}
+              {item.tags && item.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {item.tags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10"
+                    >
+                      <TagIcon className="w-3 h-3" />
+                      <span className="text-sm">{tag}</span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </Card>
