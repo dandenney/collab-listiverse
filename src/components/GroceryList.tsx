@@ -3,7 +3,7 @@ import { Plus, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface GroceryItem {
   id: string;
@@ -28,9 +28,18 @@ export function GroceryList() {
   };
 
   const toggleItem = (id: string) => {
-    setItems(items.map(item => 
+    const updatedItems = items.map(item => 
       item.id === id ? { ...item, completed: !item.completed } : item
-    ));
+    );
+    setItems(updatedItems);
+    
+    const toggledItem = updatedItems.find(item => item.id === id);
+    if (toggledItem) {
+      toast({
+        title: toggledItem.completed ? "Item Completed" : "Item Uncompleted",
+        description: toggledItem.text
+      });
+    }
   };
 
   const archiveCompleted = () => {
@@ -44,7 +53,8 @@ export function GroceryList() {
       return;
     }
     
-    setItems(items.filter(item => !item.completed));
+    const remainingItems = items.filter(item => !item.completed);
+    setItems(remainingItems);
     toast({
       title: "Items Archived",
       description: `${completedItems.length} items have been archived`
