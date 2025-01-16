@@ -39,11 +39,13 @@ export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = tru
         const response = await mql(newUrl);
         const metadata = (response as unknown as { data: Metadata }).data;
         
+        const imageUrl = metadata.image?.url || getPlaceholderImage();
+        
         onPendingItem({
           url: newUrl.trim(),
           title: metadata.title || new URL(newUrl).hostname,
-          description: metadata.description,
-          image: metadata.image?.url || getPlaceholderImage(),
+          description: metadata.description || "",
+          image: imageUrl,
           tags: []
         });
       } else {
@@ -51,6 +53,7 @@ export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = tru
           url: "",
           title: newUrl.trim(),
           description: "",
+          image: getPlaceholderImage(),
           tags: []
         });
       }
