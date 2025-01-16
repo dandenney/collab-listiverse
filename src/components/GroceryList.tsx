@@ -58,14 +58,19 @@ export function GroceryList() {
     const item = items.find(item => item.id === id);
     if (!item) return;
 
+    console.log('Starting update for item:', { id, title });
+    console.log('Current item state:', item);
+
     try {
-      await updateItemMutation.mutateAsync({
+      const updatedItem = await updateItemMutation.mutateAsync({
         id,
         title: title.trim(),
         description: item.description || "",
         notes: item.notes || "",
         tags: item.tags || []
       });
+      
+      console.log('Update successful, received:', updatedItem);
       
       // Only clear editing state if the update was successful
       setEditingItem(null);

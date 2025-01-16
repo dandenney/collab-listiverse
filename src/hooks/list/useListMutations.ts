@@ -103,6 +103,8 @@ export function useListMutations(listType: ListType) {
       notes?: string;
       tags?: string[];
     }) => {
+      console.log('Starting mutation with data:', { id, title, description, notes, tags });
+      
       // First update the item
       const { error: updateError } = await supabase
         .from('list_items')
@@ -113,17 +115,39 @@ export function useListMutations(listType: ListType) {
         })
         .eq('id', id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
+
+      console.log('Update successful, fetching updated item');
 
       // Then fetch the updated item
       const { data, error: fetchError } = await supabase
         .from('list_items')
-        .select()
+        .select(`
+          *,
+          item_tags (
+            tag_id,
+            tags (
+              name,
+              color
+            )
+          )
+        `)
         .eq('id', id)
         .maybeSingle();
         
-      if (fetchError) throw fetchError;
-      if (!data) throw new Error('Item not found');
+      if (fetchError) {
+        console.error('Fetch error:', fetchError);
+        throw fetchError;
+      }
+      if (!data) {
+        console.error('No data returned after update');
+        throw new Error('Item not found');
+      }
+
+      console.log('Fetched updated item:', data);
 
       if (tags !== undefined) {
         const { error: deleteError } = await supabase
@@ -158,12 +182,16 @@ export function useListMutations(listType: ListType) {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
       toast({
         title: "Item Updated",
         description: "Your changes have been saved"
       });
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
     }
   });
 
