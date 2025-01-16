@@ -102,9 +102,7 @@ export function useListMutations(listType: ListType) {
       notes?: string;
       tags?: string[];
     }) => {
-      console.log('Starting mutation with data:', { id, title, description, notes, tags });
-      
-      // First update the item
+      // Update the item first
       const { error: updateError } = await supabase
         .from('list_items')
         .update({ 
@@ -114,12 +112,44 @@ export function useListMutations(listType: ListType) {
         })
         .eq('id', id);
 
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
+      if (updateError) throw updateError;
+
+      // Handle tags if they were provided
+      if (tags !== undefined) {
+        // Delete existing tags
+        const { error: deleteError } = await supabase
+          .from('item_tags')
+          .delete()
+          .eq('item_id', id);
+
+        if (deleteError) throw deleteError;
+
+        if (tags.length > 0) {
+          // Get tag IDs for the provided tag names
+          const { data: tagData, error: tagError } = await supabase
+            .from('tags')
+            .select('id, name')
+            .in('name', tags);
+
+          if (tagError) throw tagError;
+
+          if (tagData && tagData.length > 0) {
+            // Create new item_tags entries
+            const itemTags = tagData.map(tag => ({
+              item_id: id,
+              tag_id: tag.id
+            }));
+
+            const { error: createError } = await supabase
+              .from('item_tags')
+              .insert(itemTags);
+
+            if (createError) throw createError;
+          }
+        }
       }
 
-      // Then fetch the updated item
+      // Fetch the complete updated item with tags
       const { data, error: fetchError } = await supabase
         .from('list_items')
         .select(`
@@ -135,57 +165,28 @@ export function useListMutations(listType: ListType) {
         .eq('id', id)
         .single();
         
-      if (fetchError) {
-        console.error('Fetch error:', fetchError);
-        throw fetchError;
-      }
-      if (!data) {
-        console.error('No data returned after update');
-        throw new Error('Item not found');
-      }
+      if (fetchError) throw fetchError;
+      if (!data) throw new Error('Item not found');
 
-      if (tags !== undefined) {
-        const { error: deleteError } = await supabase
-          .from('item_tags')
-          .delete()
-          .eq('item_id', id);
+      // Transform the data to match BaseItem structure
+      const transformedItem: BaseItem = {
+        ...data,
+        tags: data.item_tags?.map((it: any) => it.tags.name) || []
+      };
 
-        if (deleteError) throw deleteError;
-
-        if (tags.length > 0) {
-          const { data: tagData, error: tagError } = await supabase
-            .from('tags')
-            .select('id, name')
-            .in('name', tags);
-
-          if (tagError) throw tagError;
-
-          if (tagData && tagData.length > 0) {
-            const itemTags = tagData.map(tag => ({
-              item_id: id,
-              tag_id: tag.id
-            }));
-
-            const { error: createError } = await supabase
-              .from('item_tags')
-              .insert(itemTags);
-
-            if (createError) throw createError;
-          }
-        }
-      }
-
-      return data;
+      return transformedItem;
     },
-    onSuccess: (data) => {
-      // Immediately update the cache with the new data
-      queryClient.setQueryData(['items', listType], (oldData: BaseItem[] | undefined) => {
-        if (!oldData) return [data];
-        return oldData.map(item => item.id === data.id ? data : item);
-      });
+    onSuccess: (updatedItem) => {
+      // Get the current items from the cache
+      const currentItems = queryClient.getQueryData<BaseItem[]>(['items', listType]) || [];
       
-      // Then invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      // Create a new array with the updated item
+      const updatedItems = currentItems.map(item => 
+        item.id === updatedItem.id ? updatedItem : item
+      );
+      
+      // Update the cache with the new array
+      queryClient.setQueryData(['items', listType], updatedItems);
       
       toast({
         title: "Item Updated",
