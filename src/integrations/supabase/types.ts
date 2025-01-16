@@ -47,6 +47,7 @@ export type Database = {
           date: string | null
           description: string | null
           id: string
+          image: string | null
           notes: string | null
           title: string
           type: Database["public"]["Enums"]["list_type"]
@@ -61,6 +62,7 @@ export type Database = {
           date?: string | null
           description?: string | null
           id?: string
+          image?: string | null
           notes?: string | null
           title: string
           type: Database["public"]["Enums"]["list_type"]
@@ -75,6 +77,7 @@ export type Database = {
           date?: string | null
           description?: string | null
           id?: string
+          image?: string | null
           notes?: string | null
           title?: string
           type?: Database["public"]["Enums"]["list_type"]

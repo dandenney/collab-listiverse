@@ -73,7 +73,8 @@ export function BaseList({
       completed: false,
       tags: pendingItem.tags,
       date: itemDate,
-      notes: pendingItem.notes || ""
+      notes: pendingItem.notes || "",
+      image: pendingItem.image
     });
     
     setPendingItem(null);
