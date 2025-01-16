@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { Plus, Archive } from "lucide-react";
+import { Plus, Archive, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useListItems } from "@/hooks/useListItems";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function GroceryList() {
   const [newItem, setNewItem] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
   const {
@@ -57,6 +59,29 @@ export function GroceryList() {
     archiveCompletedMutation.mutate();
   };
 
+  const refreshMetadata = async () => {
+    setIsRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('refresh-metadata');
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Metadata Refresh Complete",
+        description: `Processed ${data.processed} items with ${data.errors} errors`,
+      });
+    } catch (error) {
+      console.error('Error refreshing metadata:', error);
+      toast({
+        title: "Error Refreshing Metadata",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
@@ -67,6 +92,15 @@ export function GroceryList() {
             onClick={() => setShowArchived(!showArchived)}
           >
             {showArchived ? "Show Active" : "Show Archived"}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={refreshMetadata}
+            disabled={isRefreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? "Refreshing..." : "Refresh Images"}
           </Button>
           {!showArchived && (
             <Button
