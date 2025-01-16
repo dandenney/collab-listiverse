@@ -115,28 +115,39 @@ export function useListMutations(listType: ListType) {
       console.log('Updating item:', item.id);
       console.log('New title:', item.title);
 
-      const { data, error } = await supabase
+      // First, update the item
+      const { error: updateError } = await supabase
         .from('list_items')
         .update({ 
           title: item.title,
           description: item.description || "",
           notes: item.notes || "",
         })
+        .eq('id', item.id);
+
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
+
+      // Then, fetch the updated item
+      const { data: updatedItem, error: fetchError } = await supabase
+        .from('list_items')
+        .select('*')
         .eq('id', item.id)
-        .select()
         .maybeSingle();
 
-      if (error) {
-        console.error('Update error:', error);
-        throw error;
+      if (fetchError) {
+        console.error('Fetch error after update:', fetchError);
+        throw fetchError;
       }
 
-      if (!data) {
-        throw new Error('Item not found or update failed');
+      if (!updatedItem) {
+        throw new Error('Item not found after update');
       }
 
-      console.log('Update successful:', data);
-      return data;
+      console.log('Update successful:', updatedItem);
+      return updatedItem;
     },
     onSuccess: (updatedItem) => {
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
