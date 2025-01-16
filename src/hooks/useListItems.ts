@@ -24,15 +24,33 @@ export function useListItems(listType: ListType, showArchived: boolean) {
         `)
         .eq('type', listType)
         .eq('archived', showArchived)
+        .order(listType === 'local' ? 'date' : 'created_at', { ascending: listType === 'local' })
         .order('created_at', { ascending: false });
 
       if (itemsError) throw itemsError;
 
       // Transform the data to match our BaseItem interface
-      return items.map((item: any) => ({
+      const transformedItems = items.map((item: any) => ({
         ...item,
         tags: item.item_tags?.map((it: any) => it.tags.name) || []
       }));
+
+      // For local list type, sort items with dates first
+      if (listType === 'local') {
+        return transformedItems.sort((a, b) => {
+          // If both items have dates, compare them
+          if (a.date && b.date) {
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+          }
+          // If only one item has a date, prioritize it
+          if (a.date) return -1;
+          if (b.date) return 1;
+          // If neither has a date, sort by created_at (newest first)
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+      }
+
+      return transformedItems;
     }
   });
 
