@@ -7,11 +7,15 @@ export interface BaseItem {
   tags?: string[];
   date?: string;
   notes?: string;
+  image?: string;
 }
 
 export interface Metadata {
   title?: string;
   description?: string;
+  image?: {
+    url: string;
+  };
 }
 
 export interface PendingItem {
@@ -21,6 +25,7 @@ export interface PendingItem {
   tags?: string[];
   date?: string;
   notes?: string;
+  image?: string;
 }
 
 export interface Tag {

@@ -17,6 +17,17 @@ export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = tru
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const getPlaceholderImage = () => {
+    const placeholders = [
+      'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
+      'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475',
+      'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
+      'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d'
+    ];
+    return placeholders[Math.floor(Math.random() * placeholders.length)];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUrl.trim()) return;
@@ -32,10 +43,10 @@ export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = tru
           url: newUrl.trim(),
           title: metadata.title || new URL(newUrl).hostname,
           description: metadata.description,
+          image: metadata.image?.url || getPlaceholderImage(),
           tags: []
         });
       } else {
-        // For non-URL items (like grocery items), use the input as the title
         onPendingItem({
           url: "",
           title: newUrl.trim(),
