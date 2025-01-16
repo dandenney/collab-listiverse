@@ -8,16 +8,23 @@ import { useListItems } from "@/hooks/useListItems";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+interface EditingItem {
+  id: string;
+  title: string;
+}
+
 export function GroceryList() {
   const [newItem, setNewItem] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
   const { toast } = useToast();
 
   const {
     query: { data: items = [] },
     addItemMutation,
     toggleItemMutation,
+    updateItemMutation,
     archiveCompletedMutation,
   } = useListItems("grocery", showArchived);
 
@@ -42,6 +49,27 @@ export function GroceryList() {
     const item = items.find(item => item.id === id);
     if (item) {
       toggleItemMutation.mutate({ id, completed: !item.completed });
+    }
+  };
+
+  const updateItemTitle = (id: string, title: string) => {
+    if (!title.trim()) return;
+    
+    updateItemMutation.mutate({
+      id,
+      title: title.trim(),
+      description: items.find(item => item.id === id)?.description || "",
+      notes: items.find(item => item.id === id)?.notes || "",
+      tags: items.find(item => item.id === id)?.tags || []
+    });
+    setEditingItem(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
+    if (e.key === "Enter") {
+      updateItemTitle(id, editingItem?.title || "");
+    } else if (e.key === "Escape") {
+      setEditingItem(null);
     }
   };
 
@@ -137,9 +165,23 @@ export function GroceryList() {
                 checked={item.completed}
                 onCheckedChange={() => toggleItem(item.id)}
               />
-              <span className={item.completed ? "line-through text-muted-foreground" : ""}>
-                {item.title}
-              </span>
+              {editingItem?.id === item.id ? (
+                <Input
+                  value={editingItem.title}
+                  onChange={(e) => setEditingItem({ ...editingItem, title: e.target.value })}
+                  onBlur={() => updateItemTitle(item.id, editingItem.title)}
+                  onKeyDown={(e) => handleKeyDown(e, item.id)}
+                  autoFocus
+                  className="flex-1"
+                />
+              ) : (
+                <span
+                  className={`flex-1 ${item.completed ? "line-through text-muted-foreground" : ""}`}
+                  onDoubleClick={() => !showArchived && setEditingItem({ id: item.id, title: item.title })}
+                >
+                  {item.title}
+                </span>
+              )}
             </div>
           </Card>
         ))}
