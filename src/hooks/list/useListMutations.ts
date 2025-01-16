@@ -114,9 +114,14 @@ export function useListMutations(listType: ListType) {
           notes
         })
         .eq('id', id)
-        .select();
+        .select('*');
 
-      console.log('Update response:', updateData);
+      console.log('Update query details:', {
+        table: 'list_items',
+        updateData: { title, description, notes },
+        condition: { id },
+        response: updateData
+      });
 
       if (updateError) {
         console.error('Update error:', updateError);
