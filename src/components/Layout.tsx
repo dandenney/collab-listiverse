@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Menu } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
