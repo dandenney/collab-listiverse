@@ -115,7 +115,7 @@ export function ListItem({
         />
 
         <ItemTags
-          tags={item.tags || []}
+          tags={isEditing ? editingTags : (item.tags || [])}
           isEditing={isEditing}
           availableTags={availableTags}
           onAddTag={addTag}
