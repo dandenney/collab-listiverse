@@ -6,9 +6,10 @@ interface SidebarNavItemProps {
   path: string;
   title: string;
   icon: LucideIcon;
+  onNavigate?: () => void;
 }
 
-export function SidebarNavItem({ path, title, icon: Icon }: SidebarNavItemProps) {
+export function SidebarNavItem({ path, title, icon: Icon, onNavigate }: SidebarNavItemProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { setOpenMobile } = useSidebar();
@@ -17,6 +18,7 @@ export function SidebarNavItem({ path, title, icon: Icon }: SidebarNavItemProps)
   const handleClick = () => {
     navigate(path);
     setOpenMobile(false);
+    onNavigate?.();
   };
 
   return (

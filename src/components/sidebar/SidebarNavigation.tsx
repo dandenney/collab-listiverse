@@ -20,10 +20,14 @@ const navigationItems = [
   { path: "/watch", title: "Watch", icon: Film },
   { path: "/read", title: "Read", icon: BookOpen },
   { path: "/local", title: "Local", icon: MapPin },
-  { path: "/recipes", title: "Recipe", icon: UtensilsCrossed }, // Updated path to match App.tsx
+  { path: "/recipes", title: "Recipe", icon: UtensilsCrossed },
 ];
 
-export function SidebarNavigation() {
+interface SidebarNavigationProps {
+  onNavigate?: () => void;
+}
+
+export function SidebarNavigation({ onNavigate }: SidebarNavigationProps) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="text-sidebar-foreground/70">
@@ -32,7 +36,11 @@ export function SidebarNavigation() {
       <SidebarGroupContent>
         <SidebarMenu>
           {navigationItems.map((item) => (
-            <SidebarNavItem key={item.title} {...item} />
+            <SidebarNavItem 
+              key={item.title} 
+              {...item} 
+              onNavigate={onNavigate}
+            />
           ))}
         </SidebarMenu>
       </SidebarGroupContent>
