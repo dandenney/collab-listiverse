@@ -94,14 +94,16 @@ export function useListMutations(listType: ListType) {
       notes?: string;
       tags?: string[];
     }) => {
-      const { error: itemError } = await supabase
+      const { data, error: itemError } = await supabase
         .from('list_items')
         .update({ 
           title,
           description,
           notes
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select()
+        .single();
 
       if (itemError) throw itemError;
 
@@ -135,8 +137,11 @@ export function useListMutations(listType: ListType) {
           }
         }
       }
+
+      return data;
     },
     onSuccess: () => {
+      // Immediately invalidate the query to refetch the latest data
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
       toast({
         title: "Item Updated",
