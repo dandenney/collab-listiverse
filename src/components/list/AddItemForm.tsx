@@ -39,11 +39,14 @@ export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = tru
         const response = await mql(newUrl);
         const metadata = (response as unknown as { data: Metadata }).data;
         
+        const imageUrl = metadata.image?.url;
+        const finalImageUrl = imageUrl || getPlaceholderImage();
+        
         onPendingItem({
           url: newUrl.trim(),
           title: metadata.title || new URL(newUrl).hostname,
           description: metadata.description || "",
-          image: metadata.image?.url || getPlaceholderImage(),
+          image: finalImageUrl,
           tags: []
         });
       } else {
