@@ -89,77 +89,25 @@ export function useListMutations(listType: ListType) {
   });
 
   const updateItemMutation = useMutation({
-    mutationFn: async ({ 
-      id, 
-      title,
-      description,
-      notes,
-      tags 
-    }: { 
-      id: string;
-      title: string;
-      description?: string;
-      notes?: string;
-      tags?: string[];
-    }) => {
-      // First update the item
-      const { error: updateError } = await supabase
+    mutationFn: async (item: BaseItem) => {
+      const { error } = await supabase
         .from('list_items')
         .update({ 
-          title,
-          description,
-          notes
+          title: item.title,
+          description: item.description || "",
+          notes: item.notes || "",
         })
-        .eq('id', id);
+        .eq('id', item.id);
 
-      if (updateError) throw updateError;
-
-      // Then fetch the updated item
-      const { data: updatedItem, error: fetchError } = await supabase
-        .from('list_items')
-        .select()
-        .eq('id', id)
-        .maybeSingle();
-
-      if (fetchError) throw fetchError;
-      if (!updatedItem) throw new Error('Failed to update item');
-
-      // If tags were provided, update them
-      if (tags !== undefined) {
-        // Remove existing tags
-        await supabase
-          .from('item_tags')
-          .delete()
-          .eq('item_id', id);
-
-        // Add new tags if any
-        if (tags.length > 0) {
-          const { data: tagData } = await supabase
-            .from('tags')
-            .select('id, name')
-            .in('name', tags);
-
-          if (tagData && tagData.length > 0) {
-            await supabase
-              .from('item_tags')
-              .insert(
-                tagData.map(tag => ({
-                  item_id: id,
-                  tag_id: tag.id
-                }))
-              );
-          }
-        }
-      }
-
-      return {
-        ...updatedItem,
-        tags: tags || []
-      };
+      if (error) throw error;
+      return item;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['items', listType]
+    onSuccess: (updatedItem) => {
+      queryClient.setQueryData(['items', listType], (oldData: BaseItem[] | undefined) => {
+        if (!oldData) return [updatedItem];
+        return oldData.map(item => 
+          item.id === updatedItem.id ? { ...item, ...updatedItem } : item
+        );
       });
       
       toast({

@@ -52,42 +52,26 @@ export function GroceryList() {
     }
   };
 
-  const updateItemTitle = async (id: string, title: string) => {
-    if (!title.trim()) return;
+  const updateItemTitle = (id: string, newTitle: string) => {
+    if (!newTitle.trim()) return;
     
     const item = items.find(item => item.id === id);
     if (!item) return;
 
-    console.log('Starting update for item:', { id, title });
-    console.log('Current item state:', item);
-
-    try {
-      const updatedItem = await updateItemMutation.mutateAsync({
-        id,
-        title: title.trim(),
-        description: item.description || "",
-        notes: item.notes || "",
-        tags: item.tags || []
-      });
-      
-      console.log('Update successful, received:', updatedItem);
-      
-      // Only clear editing state if the update was successful
-      setEditingItem(null);
-    } catch (error) {
-      console.error('Error updating item:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update item. Please try again.",
-        variant: "destructive"
-      });
-    }
+    updateItemMutation.mutate({
+      ...item,
+      title: newTitle.trim()
+    });
+    
+    setEditingItem(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      updateItemTitle(id, editingItem?.title || "");
+      if (editingItem) {
+        updateItemTitle(id, editingItem.title);
+      }
     } else if (e.key === "Escape") {
       setEditingItem(null);
     }
