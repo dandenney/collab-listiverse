@@ -106,14 +106,17 @@ export function useListMutations(listType: ListType) {
       console.log('Starting mutation with data:', { id, title, description, notes, tags });
       
       // First update the item
-      const { error: updateError } = await supabase
+      const { data: updateData, error: updateError } = await supabase
         .from('list_items')
         .update({ 
           title,
           description,
           notes
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
+
+      console.log('Update response:', updateData);
 
       if (updateError) {
         console.error('Update error:', updateError);
