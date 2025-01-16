@@ -53,7 +53,10 @@ export function GroceryList() {
   };
 
   const updateItemTitle = async (id: string, newTitle: string) => {
-    console.log('Attempting to update item:', id, 'with new title:', newTitle);
+    console.log('=== Update Item Debug Log ===');
+    console.log('Attempting to update item:', id);
+    console.log('New title:', newTitle);
+    console.log('Current items in state:', items);
     
     if (!newTitle.trim()) return;
     
@@ -64,17 +67,49 @@ export function GroceryList() {
     }
 
     console.log('Found item:', item);
-    console.log('Current title:', item.title);
-    console.log('New title:', newTitle.trim());
+    console.log('Current title in state:', item.title);
+
+    // Direct database check
+    const { data: dbItem, error: dbError } = await supabase
+      .from('list_items')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (dbError) {
+      console.error('Error fetching from DB:', dbError);
+    } else {
+      console.log('Current title in database:', dbItem.title);
+    }
 
     try {
+      console.log('Starting mutation with data:', {
+        ...item,
+        title: newTitle.trim()
+      });
+
       await updateItemMutation.mutateAsync({
         ...item,
         title: newTitle.trim()
       });
       
-      console.log('Update successful');
-      await refetch(); // Refetch to ensure we have the latest data
+      console.log('Mutation completed successfully');
+      
+      // Check the database again after update
+      const { data: updatedDbItem, error: updatedDbError } = await supabase
+        .from('list_items')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (updatedDbError) {
+        console.error('Error fetching updated item:', updatedDbError);
+      } else {
+        console.log('Title in database after update:', updatedDbItem.title);
+      }
+
+      await refetch();
+      console.log('Data refetched');
       
       toast({
         title: "Item Updated",
