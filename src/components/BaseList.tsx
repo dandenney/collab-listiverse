@@ -43,6 +43,7 @@ export function BaseList({
   const { data: tags = [], isLoading: isLoadingTags } = useTags();
 
   const handlePendingItem = (item: PendingItem) => {
+    console.log('Received pending item in BaseList:', item);
     setPendingItem(item);
   };
 
@@ -64,6 +65,13 @@ export function BaseList({
       const adjustedDate = new Date(localDate.getTime() - (offset * 60 * 1000));
       itemDate = adjustedDate.toISOString();
     }
+
+    console.log('Saving pending item:', {
+      ...pendingItem,
+      id: crypto.randomUUID(),
+      completed: false,
+      date: itemDate
+    });
 
     addItemMutation.mutate({
       id: crypto.randomUUID(),
