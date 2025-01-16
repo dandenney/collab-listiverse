@@ -102,95 +102,71 @@ export function useListMutations(listType: ListType) {
       notes?: string;
       tags?: string[];
     }) => {
-      // Update the item first
-      const { error: updateError } = await supabase
+      // Update the item
+      const { data: updatedItem, error: updateError } = await supabase
         .from('list_items')
         .update({ 
           title,
           description,
           notes
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select()
+        .single();
 
       if (updateError) throw updateError;
+      if (!updatedItem) throw new Error('Failed to update item');
 
-      // Handle tags if they were provided
+      // If tags were provided, update them
       if (tags !== undefined) {
-        // Delete existing tags
-        const { error: deleteError } = await supabase
+        // Remove existing tags
+        await supabase
           .from('item_tags')
           .delete()
           .eq('item_id', id);
 
-        if (deleteError) throw deleteError;
-
+        // Add new tags if any
         if (tags.length > 0) {
-          // Get tag IDs for the provided tag names
-          const { data: tagData, error: tagError } = await supabase
+          const { data: tagData } = await supabase
             .from('tags')
             .select('id, name')
             .in('name', tags);
 
-          if (tagError) throw tagError;
-
           if (tagData && tagData.length > 0) {
-            // Create new item_tags entries
-            const itemTags = tagData.map(tag => ({
-              item_id: id,
-              tag_id: tag.id
-            }));
-
-            const { error: createError } = await supabase
+            await supabase
               .from('item_tags')
-              .insert(itemTags);
-
-            if (createError) throw createError;
+              .insert(
+                tagData.map(tag => ({
+                  item_id: id,
+                  tag_id: tag.id
+                }))
+              );
           }
         }
       }
 
-      // Fetch the complete updated item with tags
-      const { data, error: fetchError } = await supabase
-        .from('list_items')
-        .select(`
-          *,
-          item_tags (
-            tag_id,
-            tags (
-              name,
-              color
-            )
-          )
-        `)
-        .eq('id', id)
-        .single();
-        
-      if (fetchError) throw fetchError;
-      if (!data) throw new Error('Item not found');
-
-      // Transform the data to match BaseItem structure
-      const transformedItem: BaseItem = {
-        ...data,
-        tags: data.item_tags?.map((it: any) => it.tags.name) || []
+      return {
+        ...updatedItem,
+        tags: tags || []
       };
-
-      return transformedItem;
     },
-    onSuccess: (updatedItem) => {
-      // Get the current items from the cache
-      const currentItems = queryClient.getQueryData<BaseItem[]>(['items', listType]) || [];
-      
-      // Create a new array with the updated item
-      const updatedItems = currentItems.map(item => 
-        item.id === updatedItem.id ? updatedItem : item
-      );
-      
-      // Update the cache with the new array
-      queryClient.setQueryData(['items', listType], updatedItems);
+    onSuccess: () => {
+      // Simply invalidate the query to trigger a refetch
+      queryClient.invalidateQueries({ 
+        queryKey: ['items', listType]
+      });
       
       toast({
         title: "Item Updated",
         description: "Your changes have been saved"
+      });
+    },
+    onError: (error) => {
+      console.error('Update error:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to save your changes. Please try again.",
+        variant: "destructive"
       });
     }
   });
