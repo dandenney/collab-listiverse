@@ -9,7 +9,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <main className="flex-1 p-6 overflow-x-hidden">
-          <div className="md:hidden mb-4">
+          <div className="md:hidden mb-4 flex justify-end">
             <SidebarTrigger>
               <Menu className="h-6 w-6" />
             </SidebarTrigger>

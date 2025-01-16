@@ -3,7 +3,7 @@ import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 
 export function AppSidebar() {
   return (
-    <Sidebar className="bg-sidebar border-r border-sidebar-border">
+    <Sidebar className="bg-sidebar border-r border-sidebar-border" side="bottom">
       <SidebarContent>
         <SidebarNavigation />
       </SidebarContent>
