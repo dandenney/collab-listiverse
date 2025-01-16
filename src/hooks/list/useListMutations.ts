@@ -61,15 +61,23 @@ export function useListMutations(listType: ListType) {
 
   const toggleItemMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('list_items')
         .update({ completed })
-        .eq('id', id)
-        .select()
-        .maybeSingle();
+        .eq('id', id);
 
       if (error) throw error;
+      
+      // Return the updated item
+      const { data, error: fetchError } = await supabase
+        .from('list_items')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+        
+      if (fetchError) throw fetchError;
       if (!data) throw new Error('Item not found');
+      
       return data;
     },
     onSuccess: (data) => {
@@ -95,18 +103,26 @@ export function useListMutations(listType: ListType) {
       notes?: string;
       tags?: string[];
     }) => {
-      const { data, error: itemError } = await supabase
+      // First update the item
+      const { error: updateError } = await supabase
         .from('list_items')
         .update({ 
           title,
           description,
           notes
         })
-        .eq('id', id)
-        .select()
-        .maybeSingle();
+        .eq('id', id);
 
-      if (itemError) throw itemError;
+      if (updateError) throw updateError;
+
+      // Then fetch the updated item
+      const { data, error: fetchError } = await supabase
+        .from('list_items')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+        
+      if (fetchError) throw fetchError;
       if (!data) throw new Error('Item not found');
 
       if (tags !== undefined) {
