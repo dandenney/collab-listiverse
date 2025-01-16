@@ -2,11 +2,13 @@ project_id = "xbzxschlyevvyuvfplmo"
 
 [api]
 enabled = true
+
 [auth]
 enabled = true
+
 [realtime]
 enabled = true
 
 [[functions]]
-name = "refresh-metadata"
+[functions.refresh-metadata]
 verify_jwt = false
