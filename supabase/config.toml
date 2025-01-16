@@ -9,6 +9,5 @@ enabled = true
 [realtime]
 enabled = true
 
-[[functions]]
 [functions.refresh-metadata]
 verify_jwt = false

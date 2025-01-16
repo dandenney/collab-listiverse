@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import { getMetadata } from 'https://esm.sh/@microlink/mql@0.10.41'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,12 +36,21 @@ serve(async (req) => {
     for (const item of items) {
       try {
         console.log(`Processing item ${item.id} with URL ${item.url}`)
-        const { data: metadata } = await getMetadata(item.url)
+        
+        // Fetch the URL and look for meta tags
+        const response = await fetch(item.url)
+        const html = await response.text()
+        
+        // Simple regex to find og:image or twitter:image meta tags
+        const ogImageMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]*)"/)
+        const twitterImageMatch = html.match(/<meta[^>]*name="twitter:image"[^>]*content="([^"]*)"/)
+        
+        const imageUrl = ogImageMatch?.[1] || twitterImageMatch?.[1] || getPlaceholderImage()
         
         const { error: updateError } = await supabase
           .from('list_items')
           .update({
-            image: metadata.image?.url || getPlaceholderImage()
+            image: imageUrl
           })
           .eq('id', item.id)
 
