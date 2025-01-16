@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Plus, Archive, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useListItems } from "@/hooks/useListItems";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { GroceryListHeader } from "./grocery/GroceryListHeader";
+import { AddGroceryItem } from "./grocery/AddGroceryItem";
+import { GroceryItem } from "./grocery/GroceryItem";
 
 interface EditingItem {
   id: string;
@@ -53,29 +51,19 @@ export function GroceryList() {
   };
 
   const updateItemTitle = async (id: string, newTitle: string) => {
-    console.log('=== Update Item Debug Log ===');
-    console.log('Attempting to update item:', id);
-    console.log('New title:', newTitle);
-    
     if (!newTitle.trim()) return;
     
     const item = items.find(item => item.id === id);
-    if (!item) {
-      console.log('Item not found:', id);
-      return;
-    }
+    if (!item) return;
 
     try {
       const updatedItem = {
         ...item,
         title: newTitle.trim()
       };
-
-      console.log('Starting mutation with:', updatedItem);
       
       await updateItemMutation.mutateAsync(updatedItem, {
         onSuccess: () => {
-          // Immediately update the cache
           refetch();
         }
       });
@@ -85,7 +73,6 @@ export function GroceryList() {
         description: `Changed "${item.title}" to "${newTitle.trim()}"`,
       });
     } catch (error) {
-      console.error('Update failed:', error);
       toast({
         title: "Update Failed",
         description: "Could not update the item. Please try again.",
@@ -151,78 +138,37 @@ export function GroceryList() {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Grocery List</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => setShowArchived(!showArchived)}
-          >
-            {showArchived ? "Show Active" : "Show Archived"}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={refreshMetadata}
-            disabled={isRefreshing}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? "Refreshing..." : "Refresh Images"}
-          </Button>
-          {!showArchived && (
-            <Button
-              variant="ghost"
-              onClick={archiveCompleted}
-              className="flex items-center gap-2"
-            >
-              <Archive className="w-4 h-4" />
-              Archive Completed
-            </Button>
-          )}
-        </div>
-      </div>
+      <GroceryListHeader
+        showArchived={showArchived}
+        isRefreshing={isRefreshing}
+        onToggleArchived={() => setShowArchived(!showArchived)}
+        onRefreshMetadata={refreshMetadata}
+        onArchiveCompleted={archiveCompleted}
+      />
 
       {!showArchived && (
-        <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
-          <Input
-            value={newItem}
-            onChange={(e) => setNewItem(e.target.value)}
-            placeholder="Add an item..."
-            className="flex-1"
-          />
-          <Button type="submit" size="icon" variant="ghost">
-            <Plus className="h-4 w-4" />
-          </Button>
-        </form>
+        <AddGroceryItem
+          newItem={newItem}
+          onNewItemChange={setNewItem}
+          onSubmit={handleSubmit}
+        />
       )}
 
       <div className="space-y-2">
         {items.map((item) => (
-          <Card key={item.id} className="p-4">
-            <div className="flex items-center gap-3">
-              <Checkbox
-                checked={item.completed}
-                onCheckedChange={() => toggleItem(item.id)}
-              />
-              {editingItem?.id === item.id ? (
-                <Input
-                  value={editingItem.title}
-                  onChange={(e) => setEditingItem({ ...editingItem, title: e.target.value })}
-                  onBlur={() => handleBlur(item.id)}
-                  onKeyDown={(e) => handleKeyDown(e, item.id)}
-                  autoFocus
-                  className="flex-1"
-                />
-              ) : (
-                <span
-                  className={`flex-1 ${item.completed ? "line-through text-muted-foreground" : ""}`}
-                  onDoubleClick={() => !showArchived && setEditingItem({ id: item.id, title: item.title })}
-                >
-                  {item.title}
-                </span>
-              )}
-            </div>
-          </Card>
+          <GroceryItem
+            key={item.id}
+            id={item.id}
+            title={item.title}
+            completed={item.completed}
+            isEditing={editingItem?.id === item.id}
+            editingTitle={editingItem?.title || item.title}
+            onToggle={() => toggleItem(item.id)}
+            onEditingTitleChange={(value) => setEditingItem({ id: item.id, title: value })}
+            onBlur={() => handleBlur(item.id)}
+            onKeyDown={(e) => handleKeyDown(e, item.id)}
+            onDoubleClick={() => !showArchived && setEditingItem({ id: item.id, title: item.title })}
+          />
         ))}
       </div>
     </div>
