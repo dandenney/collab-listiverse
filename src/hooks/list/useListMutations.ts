@@ -124,12 +124,8 @@ export function useListMutations(listType: ListType) {
       return item;
     },
     onSuccess: (updatedItem) => {
-      queryClient.setQueryData(['items', listType], (oldData: BaseItem[] | undefined) => {
-        if (!oldData) return [updatedItem];
-        return oldData.map(item => 
-          item.id === updatedItem.id ? { ...item, ...updatedItem } : item
-        );
-      });
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['items', listType] });
       
       toast({
         title: "Item Updated",

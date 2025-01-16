@@ -73,8 +73,12 @@ export function GroceryList() {
 
       console.log('Starting mutation with:', updatedItem);
       
-      await updateItemMutation.mutateAsync(updatedItem);
-      await refetch();
+      await updateItemMutation.mutateAsync(updatedItem, {
+        onSuccess: () => {
+          // Immediately update the cache
+          refetch();
+        }
+      });
       
       toast({
         title: "Item Updated",
