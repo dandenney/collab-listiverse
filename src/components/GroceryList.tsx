@@ -52,20 +52,31 @@ export function GroceryList() {
     }
   };
 
-  const updateItemTitle = (id: string, title: string) => {
+  const updateItemTitle = async (id: string, title: string) => {
     if (!title.trim()) return;
     
     const item = items.find(item => item.id === id);
     if (!item) return;
 
-    updateItemMutation.mutate({
-      id,
-      title: title.trim(),
-      description: item.description || "",
-      notes: item.notes || "",
-      tags: item.tags || []
-    });
-    setEditingItem(null);
+    try {
+      await updateItemMutation.mutateAsync({
+        id,
+        title: title.trim(),
+        description: item.description || "",
+        notes: item.notes || "",
+        tags: item.tags || []
+      });
+      
+      // Only clear editing state if the update was successful
+      setEditingItem(null);
+    } catch (error) {
+      console.error('Error updating item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update item. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
