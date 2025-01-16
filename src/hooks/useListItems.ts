@@ -111,6 +111,75 @@ export function useListItems(listType: ListType, showArchived: boolean) {
     }
   });
 
+  const updateItemMutation = useMutation({
+    mutationFn: async ({ 
+      id, 
+      title,
+      description,
+      notes,
+      tags 
+    }: { 
+      id: string;
+      title: string;
+      description?: string;
+      notes?: string;
+      tags?: string[];
+    }) => {
+      // First update the list item
+      const { error: itemError } = await supabase
+        .from('list_items')
+        .update({ 
+          title,
+          description,
+          notes
+        })
+        .eq('id', id);
+
+      if (itemError) throw itemError;
+
+      if (tags !== undefined) {
+        // Delete existing tags
+        const { error: deleteError } = await supabase
+          .from('item_tags')
+          .delete()
+          .eq('item_id', id);
+
+        if (deleteError) throw deleteError;
+
+        if (tags.length > 0) {
+          // Get tag IDs
+          const { data: tagData, error: tagError } = await supabase
+            .from('tags')
+            .select('id, name')
+            .in('name', tags);
+
+          if (tagError) throw tagError;
+
+          if (tagData && tagData.length > 0) {
+            // Create new item_tags relationships
+            const itemTags = tagData.map(tag => ({
+              item_id: id,
+              tag_id: tag.id
+            }));
+
+            const { error: createError } = await supabase
+              .from('item_tags')
+              .insert(itemTags);
+
+            if (createError) throw createError;
+          }
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      toast({
+        title: "Item Updated",
+        description: "Your changes have been saved"
+      });
+    }
+  });
+
   const updateNotesMutation = useMutation({
     mutationFn: async ({ id, notes }: { id: string; notes: string }) => {
       const { error } = await supabase
@@ -152,6 +221,7 @@ export function useListItems(listType: ListType, showArchived: boolean) {
     query,
     addItemMutation,
     toggleItemMutation,
+    updateItemMutation,
     updateNotesMutation,
     archiveCompletedMutation
   };

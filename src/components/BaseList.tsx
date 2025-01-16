@@ -36,7 +36,7 @@ export function BaseList({
     query: { data: items = [], isLoading: isLoadingItems },
     addItemMutation,
     toggleItemMutation,
-    updateNotesMutation,
+    updateItemMutation,
     archiveCompletedMutation
   } = useListItems(listType, showArchived);
 
@@ -63,10 +63,6 @@ export function BaseList({
       const offset = localDate.getTimezoneOffset();
       const adjustedDate = new Date(localDate.getTime() - (offset * 60 * 1000));
       itemDate = adjustedDate.toISOString();
-      
-      console.log('Original date:', pendingItem.date);
-      console.log('Local date:', localDate.toISOString());
-      console.log('Adjusted date:', itemDate);
     }
 
     addItemMutation.mutate({
@@ -90,8 +86,13 @@ export function BaseList({
     }
   };
 
-  const updateItemNotes = (id: string, notes: string) => {
-    updateNotesMutation.mutate({ id, notes });
+  const updateItem = (id: string, updates: {
+    title: string;
+    description?: string;
+    notes?: string;
+    tags?: string[];
+  }) => {
+    updateItemMutation.mutate({ id, ...updates });
   };
 
   const archiveCompleted = () => {
@@ -165,7 +166,12 @@ export function BaseList({
             completeButtonText={completeButtonText}
             uncompleteButtonText={uncompleteButtonText}
             onToggle={!showArchived ? toggleItem : undefined}
-            onNotesChange={!showArchived ? updateItemNotes : undefined}
+            onNotesChange={!showArchived ? (id, notes) => updateItem(id, {
+              title: item.title,
+              description: item.description,
+              notes,
+              tags: item.tags
+            }) : undefined}
             showDate={showDate}
           />
         ))}
