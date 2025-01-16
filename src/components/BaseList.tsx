@@ -37,7 +37,7 @@ export function BaseList({
     archiveCompletedMutation
   } = useListItems(listType, showArchived);
 
-  const { data: tags = [], isLoading: isLoadingTags } = useTags(listType);
+  const { tags = [], isLoading: isLoadingTags } = useTags(listType);
 
   const handlePendingItem = (item: PendingItem) => {
     console.log('Received pending item in BaseList:', item);
