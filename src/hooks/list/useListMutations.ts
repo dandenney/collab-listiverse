@@ -66,9 +66,10 @@ export function useListMutations(listType: ListType) {
         .update({ completed })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Item not found');
       return data;
     },
     onSuccess: (data) => {
@@ -103,9 +104,10 @@ export function useListMutations(listType: ListType) {
         })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (itemError) throw itemError;
+      if (!data) throw new Error('Item not found');
 
       if (tags !== undefined) {
         const { error: deleteError } = await supabase
@@ -141,7 +143,6 @@ export function useListMutations(listType: ListType) {
       return data;
     },
     onSuccess: () => {
-      // Immediately invalidate the query to refetch the latest data
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
       toast({
         title: "Item Updated",
