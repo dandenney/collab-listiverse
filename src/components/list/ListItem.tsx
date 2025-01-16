@@ -34,7 +34,7 @@ export function ListItem({
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
-  const { data: availableTags = [] } = useTags();
+  const { tags: availableTags = [] } = useTags();
 
   const startEditing = () => {
     setEditingTitle(item.title);

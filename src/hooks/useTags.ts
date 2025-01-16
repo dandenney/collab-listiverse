@@ -35,7 +35,7 @@ export function useTags(listType?: ListType) {
         .insert([{
           name,
           color,
-          type: listType,
+          type: listType || 'read', // Default to 'read' if no type provided
           user_id: user.user.id
         }])
         .select()

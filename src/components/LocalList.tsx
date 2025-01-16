@@ -19,16 +19,20 @@ export function LocalList() {
   const [newTag, setNewTag] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { data: tags = [] } = useTags();
+  const { tags = [] } = useTags("local");
 
   const addTagMutation = useMutation({
     mutationFn: async (tagName: string) => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('tags')
         .insert([{
           name: tagName,
           color: `bg-${['red', 'yellow', 'blue', 'green', 'purple'][Math.floor(Math.random() * 5)]}-500`,
-          user_id: (await supabase.auth.getUser()).data.user?.id
+          type: 'local',
+          user_id: userData.user.id
         }])
         .select()
         .single();
