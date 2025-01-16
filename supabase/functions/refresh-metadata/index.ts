@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import mql from '@microlink/mql'
+import { getMetadata } from 'https://esm.sh/@microlink/mql@0.10.41'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +37,7 @@ serve(async (req) => {
     for (const item of items) {
       try {
         console.log(`Processing item ${item.id} with URL ${item.url}`)
-        const { data: metadata } = await mql(item.url)
+        const { data: metadata } = await getMetadata(item.url)
         
         const { error: updateError } = await supabase
           .from('list_items')
