@@ -55,21 +55,31 @@ export function GroceryList() {
   const updateItemTitle = (id: string, title: string) => {
     if (!title.trim()) return;
     
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+
     updateItemMutation.mutate({
       id,
       title: title.trim(),
-      description: items.find(item => item.id === id)?.description || "",
-      notes: items.find(item => item.id === id)?.notes || "",
-      tags: items.find(item => item.id === id)?.tags || []
+      description: item.description || "",
+      notes: item.notes || "",
+      tags: item.tags || []
     });
     setEditingItem(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
     if (e.key === "Enter") {
+      e.preventDefault();
       updateItemTitle(id, editingItem?.title || "");
     } else if (e.key === "Escape") {
       setEditingItem(null);
+    }
+  };
+
+  const handleBlur = (id: string) => {
+    if (editingItem) {
+      updateItemTitle(id, editingItem.title);
     }
   };
 
@@ -169,7 +179,7 @@ export function GroceryList() {
                 <Input
                   value={editingItem.title}
                   onChange={(e) => setEditingItem({ ...editingItem, title: e.target.value })}
-                  onBlur={() => updateItemTitle(item.id, editingItem.title)}
+                  onBlur={() => handleBlur(item.id)}
                   onKeyDown={(e) => handleKeyDown(e, item.id)}
                   autoFocus
                   className="flex-1"
