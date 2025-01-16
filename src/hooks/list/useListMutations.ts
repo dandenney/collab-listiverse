@@ -102,19 +102,26 @@ export function useListMutations(listType: ListType) {
       notes?: string;
       tags?: string[];
     }) => {
-      // Update the item
-      const { data: updatedItem, error: updateError } = await supabase
+      // First update the item
+      const { error: updateError } = await supabase
         .from('list_items')
         .update({ 
           title,
           description,
           notes
         })
-        .eq('id', id)
-        .select()
-        .single();
+        .eq('id', id);
 
       if (updateError) throw updateError;
+
+      // Then fetch the updated item
+      const { data: updatedItem, error: fetchError } = await supabase
+        .from('list_items')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
       if (!updatedItem) throw new Error('Failed to update item');
 
       // If tags were provided, update them
@@ -151,7 +158,6 @@ export function useListMutations(listType: ListType) {
       };
     },
     onSuccess: () => {
-      // Simply invalidate the query to trigger a refetch
       queryClient.invalidateQueries({ 
         queryKey: ['items', listType]
       });
