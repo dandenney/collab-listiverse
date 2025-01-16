@@ -21,7 +21,7 @@ export function GroceryList() {
   const { toast } = useToast();
 
   const {
-    query: { data: items = [] },
+    query: { data: items = [], refetch },
     addItemMutation,
     toggleItemMutation,
     updateItemMutation,
@@ -52,7 +52,7 @@ export function GroceryList() {
     }
   };
 
-  const updateItemTitle = (id: string, newTitle: string) => {
+  const updateItemTitle = async (id: string, newTitle: string) => {
     console.log('Attempting to update item:', id, 'with new title:', newTitle);
     
     if (!newTitle.trim()) return;
@@ -67,26 +67,27 @@ export function GroceryList() {
     console.log('Current title:', item.title);
     console.log('New title:', newTitle.trim());
 
-    updateItemMutation.mutate({
-      ...item,
-      title: newTitle.trim()
-    }, {
-      onSuccess: () => {
-        console.log('Update successful');
-        toast({
-          title: "Item Updated",
-          description: `Changed "${item.title}" to "${newTitle.trim()}"`,
-        });
-      },
-      onError: (error) => {
-        console.error('Update failed:', error);
-        toast({
-          title: "Update Failed",
-          description: "Could not update the item. Please try again.",
-          variant: "destructive"
-        });
-      }
-    });
+    try {
+      await updateItemMutation.mutateAsync({
+        ...item,
+        title: newTitle.trim()
+      });
+      
+      console.log('Update successful');
+      await refetch(); // Refetch to ensure we have the latest data
+      
+      toast({
+        title: "Item Updated",
+        description: `Changed "${item.title}" to "${newTitle.trim()}"`,
+      });
+    } catch (error) {
+      console.error('Update failed:', error);
+      toast({
+        title: "Update Failed",
+        description: "Could not update the item. Please try again.",
+        variant: "destructive"
+      });
+    }
     
     setEditingItem(null);
   };
