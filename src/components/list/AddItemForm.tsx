@@ -25,7 +25,9 @@ export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = tru
       'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
       'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d'
     ];
-    return placeholders[Math.floor(Math.random() * placeholders.length)];
+    const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
+    console.log('Selected placeholder image:', placeholder);
+    return placeholder;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,32 +37,42 @@ export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = tru
     setIsLoading(true);
     try {
       if (isUrlRequired) {
+        console.log('Fetching metadata for URL:', newUrl);
         new URL(newUrl);
         const response = await mql(newUrl);
         const metadata = (response as unknown as { data: Metadata }).data;
+        console.log('Received metadata:', metadata);
         
         const imageUrl = metadata.image?.url;
-        const finalImageUrl = imageUrl || getPlaceholderImage();
+        console.log('Metadata image URL:', imageUrl);
         
-        onPendingItem({
+        const finalImageUrl = imageUrl || getPlaceholderImage();
+        console.log('Final image URL to be used:', finalImageUrl);
+        
+        const pendingItem = {
           url: newUrl.trim(),
           title: metadata.title || new URL(newUrl).hostname,
           description: metadata.description || "",
           image: finalImageUrl,
           tags: []
-        });
+        };
+        console.log('Creating pending item:', pendingItem);
+        onPendingItem(pendingItem);
       } else {
+        const placeholderImage = getPlaceholderImage();
+        console.log('Using placeholder for non-URL item:', placeholderImage);
         onPendingItem({
           url: "",
           title: newUrl.trim(),
           description: "",
-          image: getPlaceholderImage(),
+          image: placeholderImage,
           tags: []
         });
       }
       
       setNewUrl("");
     } catch (error) {
+      console.error('Error in handleSubmit:', error);
       toast({
         title: isUrlRequired ? "Error fetching metadata" : "Error adding item",
         description: isUrlRequired ? "Please enter a valid URL" : "Please try again",
