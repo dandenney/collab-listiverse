@@ -9,6 +9,7 @@ export function WatchList() {
       uncompleteButtonText="Mark Unwatched"
       listType="watch"
       showDate={false}
+      isUrlRequired={true}
     />
   );
 }
