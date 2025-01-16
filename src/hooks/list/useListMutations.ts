@@ -115,35 +115,44 @@ export function useListMutations(listType: ListType) {
       console.log('Updating item:', item.id);
       console.log('New title:', item.title);
 
-      // First, update the item
-      const { error: updateError } = await supabase
-        .from('list_items')
-        .update({ 
-          title: item.title,
-          description: item.description || "",
-          notes: item.notes || "",
-        })
-        .eq('id', item.id);
-
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
-      }
-
-      // Then, fetch the updated item
-      const { data: updatedItem, error: fetchError } = await supabase
+      // First, get the current item to ensure it exists
+      const { data: existingItem, error: fetchError } = await supabase
         .from('list_items')
         .select('*')
         .eq('id', item.id)
         .maybeSingle();
 
       if (fetchError) {
-        console.error('Fetch error after update:', fetchError);
+        console.error('Fetch error:', fetchError);
         throw fetchError;
       }
 
+      if (!existingItem) {
+        throw new Error('Item not found');
+      }
+
+      // Prepare update payload, keeping existing values if not provided
+      const updatePayload = {
+        title: item.title || existingItem.title,
+        description: item.description ?? existingItem.description,
+        notes: item.notes ?? existingItem.notes,
+      };
+
+      // Then update the item
+      const { data: updatedItem, error: updateError } = await supabase
+        .from('list_items')
+        .update(updatePayload)
+        .eq('id', item.id)
+        .select()
+        .maybeSingle();
+
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
+
       if (!updatedItem) {
-        throw new Error('Item not found after update');
+        throw new Error('Update failed');
       }
 
       console.log('Update successful:', updatedItem);
