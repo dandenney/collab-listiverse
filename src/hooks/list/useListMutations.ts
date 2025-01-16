@@ -9,22 +9,34 @@ export function useListMutations(listType: ListType) {
 
   const addItemMutation = useMutation({
     mutationFn: async (newItem: BaseItem) => {
+      console.log('Starting mutation with item:', newItem);
+      
+      const itemToInsert = {
+        type: listType,
+        url: newItem.url,
+        title: newItem.title,
+        description: newItem.description,
+        completed: false,
+        notes: newItem.notes,
+        date: newItem.date,
+        image: newItem.image,
+        user_id: (await supabase.auth.getUser()).data.user?.id
+      };
+      
+      console.log('Attempting to insert item:', itemToInsert);
+
       const { data: item, error: itemError } = await supabase
         .from('list_items')
-        .insert([{
-          type: listType,
-          url: newItem.url,
-          title: newItem.title,
-          description: newItem.description,
-          completed: false,
-          notes: newItem.notes,
-          date: newItem.date,
-          user_id: (await supabase.auth.getUser()).data.user?.id
-        }])
+        .insert([itemToInsert])
         .select()
         .single();
 
-      if (itemError) throw itemError;
+      if (itemError) {
+        console.error('Error inserting item:', itemError);
+        throw itemError;
+      }
+
+      console.log('Successfully inserted item:', item);
 
       if (newItem.tags && newItem.tags.length > 0) {
         const { data: tags, error: tagsError } = await supabase
@@ -50,11 +62,20 @@ export function useListMutations(listType: ListType) {
 
       return item;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation completed successfully with data:', data);
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
       toast({
         title: "Item Added",
         description: "Your item has been added to the list"
+      });
+    },
+    onError: (error) => {
+      console.error('Mutation failed:', error);
+      toast({
+        title: "Failed to add item",
+        description: "There was an error adding your item",
+        variant: "destructive"
       });
     }
   });
