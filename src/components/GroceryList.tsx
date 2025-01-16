@@ -109,7 +109,6 @@ export function GroceryList() {
         description: `Processed ${data.processed} items with ${data.errors} errors`,
       });
     } catch (error) {
-      console.error('Error refreshing metadata:', error);
       toast({
         title: "Error Refreshing Metadata",
         description: "Please try again later",

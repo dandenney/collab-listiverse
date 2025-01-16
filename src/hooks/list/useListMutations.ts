@@ -115,8 +115,7 @@ export function useListMutations(listType: ListType) {
         description: "Your changes have been saved"
       });
     },
-    onError: (error) => {
-      console.error('Update error:', error);
+    onError: () => {
       toast({
         title: "Update Failed",
         description: "Failed to save your changes. Please try again.",
