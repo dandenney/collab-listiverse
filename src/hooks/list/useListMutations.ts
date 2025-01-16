@@ -68,7 +68,6 @@ export function useListMutations(listType: ListType) {
 
       if (error) throw error;
       
-      // Return the updated item
       const { data, error: fetchError } = await supabase
         .from('list_items')
         .select()
@@ -105,7 +104,7 @@ export function useListMutations(listType: ListType) {
     }) => {
       console.log('Starting mutation with data:', { id, title, description, notes, tags });
       
-      // First update the item without selecting
+      // First update the item
       const { error: updateError } = await supabase
         .from('list_items')
         .update({ 
@@ -115,20 +114,12 @@ export function useListMutations(listType: ListType) {
         })
         .eq('id', id);
 
-      console.log('Update query details:', {
-        table: 'list_items',
-        updateData: { title, description, notes },
-        condition: { id }
-      });
-
       if (updateError) {
         console.error('Update error:', updateError);
         throw updateError;
       }
 
-      console.log('Update successful, fetching updated item');
-
-      // Then fetch the updated item separately
+      // Then fetch the updated item
       const { data, error: fetchError } = await supabase
         .from('list_items')
         .select(`
@@ -142,7 +133,7 @@ export function useListMutations(listType: ListType) {
           )
         `)
         .eq('id', id)
-        .maybeSingle();
+        .single();
         
       if (fetchError) {
         console.error('Fetch error:', fetchError);
@@ -152,8 +143,6 @@ export function useListMutations(listType: ListType) {
         console.error('No data returned after update');
         throw new Error('Item not found');
       }
-
-      console.log('Fetched updated item:', data);
 
       if (tags !== undefined) {
         const { error: deleteError } = await supabase
@@ -189,15 +178,19 @@ export function useListMutations(listType: ListType) {
       return data;
     },
     onSuccess: (data) => {
-      console.log('Mutation successful, invalidating queries');
+      // Immediately update the cache with the new data
+      queryClient.setQueryData(['items', listType], (oldData: BaseItem[] | undefined) => {
+        if (!oldData) return [data];
+        return oldData.map(item => item.id === data.id ? data : item);
+      });
+      
+      // Then invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      
       toast({
         title: "Item Updated",
         description: "Your changes have been saved"
       });
-    },
-    onError: (error) => {
-      console.error('Mutation error:', error);
     }
   });
 
