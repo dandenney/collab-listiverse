@@ -66,14 +66,7 @@ export function BaseList({
       itemDate = adjustedDate.toISOString();
     }
 
-    console.log('Saving pending item:', {
-      ...pendingItem,
-      id: crypto.randomUUID(),
-      completed: false,
-      date: itemDate
-    });
-
-    addItemMutation.mutate({
+    const newItem = {
       id: crypto.randomUUID(),
       url: pendingItem.url,
       title: pendingItem.title,
@@ -83,8 +76,11 @@ export function BaseList({
       date: itemDate,
       notes: pendingItem.notes || "",
       image: pendingItem.image
-    });
+    };
+
+    console.log('Saving pending item:', newItem);
     
+    addItemMutation.mutate(newItem);
     setPendingItem(null);
   };
 
