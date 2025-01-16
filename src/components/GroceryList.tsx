@@ -56,7 +56,6 @@ export function GroceryList() {
     console.log('=== Update Item Debug Log ===');
     console.log('Attempting to update item:', id);
     console.log('New title:', newTitle);
-    console.log('Current items in state:', items);
     
     if (!newTitle.trim()) return;
     
@@ -66,50 +65,16 @@ export function GroceryList() {
       return;
     }
 
-    console.log('Found item:', item);
-    console.log('Current title in state:', item.title);
-
-    // Direct database check
-    const { data: dbItem, error: dbError } = await supabase
-      .from('list_items')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (dbError) {
-      console.error('Error fetching from DB:', dbError);
-    } else {
-      console.log('Current title in database:', dbItem.title);
-    }
-
     try {
-      console.log('Starting mutation with data:', {
+      const updatedItem = {
         ...item,
         title: newTitle.trim()
-      });
+      };
 
-      await updateItemMutation.mutateAsync({
-        ...item,
-        title: newTitle.trim()
-      });
+      console.log('Starting mutation with:', updatedItem);
       
-      console.log('Mutation completed successfully');
-      
-      // Check the database again after update
-      const { data: updatedDbItem, error: updatedDbError } = await supabase
-        .from('list_items')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (updatedDbError) {
-        console.error('Error fetching updated item:', updatedDbError);
-      } else {
-        console.log('Title in database after update:', updatedDbItem.title);
-      }
-
+      await updateItemMutation.mutateAsync(updatedItem);
       await refetch();
-      console.log('Data refetched');
       
       toast({
         title: "Item Updated",
@@ -122,9 +87,9 @@ export function GroceryList() {
         description: "Could not update the item. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setEditingItem(null);
     }
-    
-    setEditingItem(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
