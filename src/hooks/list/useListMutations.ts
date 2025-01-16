@@ -105,22 +105,20 @@ export function useListMutations(listType: ListType) {
     }) => {
       console.log('Starting mutation with data:', { id, title, description, notes, tags });
       
-      // First update the item
-      const { data: updateData, error: updateError } = await supabase
+      // First update the item without selecting
+      const { error: updateError } = await supabase
         .from('list_items')
         .update({ 
           title,
           description,
           notes
         })
-        .eq('id', id)
-        .select('*');
+        .eq('id', id);
 
       console.log('Update query details:', {
         table: 'list_items',
         updateData: { title, description, notes },
-        condition: { id },
-        response: updateData
+        condition: { id }
       });
 
       if (updateError) {
@@ -130,7 +128,7 @@ export function useListMutations(listType: ListType) {
 
       console.log('Update successful, fetching updated item');
 
-      // Then fetch the updated item
+      // Then fetch the updated item separately
       const { data, error: fetchError } = await supabase
         .from('list_items')
         .select(`
