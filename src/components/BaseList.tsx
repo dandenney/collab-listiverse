@@ -85,18 +85,13 @@ export function BaseList({
     }
   };
 
-  const updateItem = (id: string, updates: {
-    title: string;
-    description?: string;
-    notes?: string;
-    tags?: string[];
-  }) => {
+  const updateItem = (id: string, notes: string) => {
     const item = items.find(item => item.id === id);
     if (!item) return;
 
     updateItemMutation.mutate({
       ...item,
-      ...updates
+      notes
     });
   };
 
