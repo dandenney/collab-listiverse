@@ -53,13 +53,19 @@ export function BaseList({
     let itemDate = pendingItem.date;
     if (itemDate) {
       const date = new Date(itemDate);
-      // Get local timezone offset in minutes
-      const timezoneOffset = date.getTimezoneOffset();
-      // Create new date and adjust for timezone
-      const adjustedDate = new Date(date.getTime() + timezoneOffset * 60000);
+      // Set the time to midnight in the local timezone
+      const localDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
+      // Convert to ISO string but preserve the local date
+      const offset = localDate.getTimezoneOffset();
+      const adjustedDate = new Date(localDate.getTime() - (offset * 60 * 1000));
       itemDate = adjustedDate.toISOString();
+      
       console.log('Original date:', pendingItem.date);
-      console.log('Timezone offset (minutes):', timezoneOffset);
+      console.log('Local date:', localDate.toISOString());
       console.log('Adjusted date:', itemDate);
     }
 
