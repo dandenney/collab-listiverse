@@ -111,20 +111,30 @@ export function useListMutations(listType: ListType) {
 
   const updateItemMutation = useMutation({
     mutationFn: async (item: BaseItem) => {
-      const { error } = await supabase
+      console.log('=== Update Mutation Debug Log ===');
+      console.log('Updating item:', item.id);
+      console.log('New title:', item.title);
+
+      const { data, error } = await supabase
         .from('list_items')
         .update({ 
           title: item.title,
           description: item.description || "",
           notes: item.notes || "",
         })
-        .eq('id', item.id);
+        .eq('id', item.id)
+        .select()
+        .single();
 
-      if (error) throw error;
-      return item;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
+
+      console.log('Update successful:', data);
+      return data;
     },
     onSuccess: (updatedItem) => {
-      // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
       
       toast({
@@ -132,7 +142,8 @@ export function useListMutations(listType: ListType) {
         description: "Your changes have been saved"
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Update failed:', error);
       toast({
         title: "Update Failed",
         description: "Failed to save your changes. Please try again.",
