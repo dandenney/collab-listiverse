@@ -93,7 +93,13 @@ export function BaseList({
     notes?: string;
     tags?: string[];
   }) => {
-    updateItemMutation.mutate({ id, ...updates });
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+
+    updateItemMutation.mutate({
+      ...item,
+      ...updates
+    });
   };
 
   const archiveCompleted = () => {
