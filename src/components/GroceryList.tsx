@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useListItems } from "@/hooks/useListItems";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { GroceryListHeader } from "./grocery/GroceryListHeader";
 import { AddGroceryItem } from "./grocery/AddGroceryItem";
 import { GroceryItem } from "./grocery/GroceryItem";
@@ -14,7 +13,6 @@ interface EditingItem {
 export function GroceryList() {
   const [newItem, setNewItem] = useState("");
   const [showArchived, setShowArchived] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
   const { toast } = useToast();
 
@@ -114,35 +112,11 @@ export function GroceryList() {
     archiveCompletedMutation.mutate();
   };
 
-  const refreshMetadata = async () => {
-    setIsRefreshing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('refresh-metadata');
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Metadata Refresh Complete",
-        description: `Processed ${data.processed} items with ${data.errors} errors`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error Refreshing Metadata",
-        description: "Please try again later",
-        variant: "destructive"
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   return (
     <div className="w-full max-w-2xl mx-auto">
       <GroceryListHeader
         showArchived={showArchived}
-        isRefreshing={isRefreshing}
         onToggleArchived={() => setShowArchived(!showArchived)}
-        onRefreshMetadata={refreshMetadata}
         onArchiveCompleted={archiveCompleted}
       />
 
