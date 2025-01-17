@@ -85,13 +85,13 @@
     }
   }
   
-  @container (min-width: 700px) {
+  @container (min-width: 900px) {
     .@lg\:grid-cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   
-  @container (min-width: 900px) {
+  @container (min-width: 1200px) {
     .@xl\:grid-cols-4 {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
