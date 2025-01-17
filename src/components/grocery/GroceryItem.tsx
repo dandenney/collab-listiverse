@@ -29,28 +29,30 @@ export function GroceryItem({
 }: GroceryItemProps) {
   return (
     <Card className="p-4">
-      <div className="flex items-center gap-3">
-        <Checkbox
-          checked={completed}
-          onCheckedChange={onToggle}
-        />
-        {isEditing ? (
-          <Input
-            value={editingTitle}
-            onChange={(e) => onEditingTitleChange(e.target.value)}
-            onBlur={onBlur}
-            onKeyDown={onKeyDown}
-            autoFocus
-            className="flex-1"
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1">
+          <Checkbox
+            checked={completed}
+            onCheckedChange={onToggle}
           />
-        ) : (
-          <span
-            className={`flex-1 ${completed ? "line-through text-muted-foreground" : ""}`}
-            onDoubleClick={onDoubleClick}
-          >
-            {title}
-          </span>
-        )}
+          {isEditing ? (
+            <Input
+              value={editingTitle}
+              onChange={(e) => onEditingTitleChange(e.target.value)}
+              onBlur={onBlur}
+              onKeyDown={onKeyDown}
+              autoFocus
+              className="flex-1"
+            />
+          ) : (
+            <span
+              className={`flex-1 ${completed ? "line-through text-muted-foreground" : ""}`}
+              onDoubleClick={onDoubleClick}
+            >
+              {title}
+            </span>
+          )}
+        </div>
       </div>
     </Card>
   );
