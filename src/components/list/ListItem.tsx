@@ -141,13 +141,14 @@ export function ListItem({
             {onToggle && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={(e) => {
                   e.preventDefault();
                   onToggle(item.id);
                 }}
+                title={item.completed ? uncompleteButtonText : completeButtonText}
               >
-                {item.completed ? uncompleteButtonText : completeButtonText}
+                <Check className="w-4 h-4" />
               </Button>
             )}
           </div>
