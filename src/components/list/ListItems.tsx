@@ -19,7 +19,7 @@ export function ListItems({
   showDate = false
 }: ListItemsProps) {
   return (
-    <div className="space-y-2">
+    <>
       {items.map((item) => (
         <ListItem
           key={item.id}
@@ -31,6 +31,6 @@ export function ListItems({
           showDate={showDate}
         />
       ))}
-    </div>
+    </>
   );
 }
