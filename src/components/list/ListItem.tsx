@@ -126,40 +126,42 @@ export function ListItem({
         </div>
       </div>
 
-      <div className="p-4 border-t mt-auto flex items-center justify-between">
-        <div className="flex gap-2">
-          {onNotesChange && (
+      <div className="p-4 border-t mt-auto">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            {onNotesChange && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={isEditing ? saveChanges : startEditing}
+              >
+                {isEditing ? <Check className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
+              </Button>
+            )}
+            {onToggle && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onToggle(item.id);
+                }}
+              >
+                {item.completed ? uncompleteButtonText : completeButtonText}
+              </Button>
+            )}
+          </div>
+          {isEditing && (
             <Button
-              variant="ghost"
               size="sm"
-              onClick={isEditing ? saveChanges : startEditing}
+              onClick={saveChanges}
+              className="flex items-center gap-2"
             >
-              {isEditing ? <Check className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-            </Button>
-          )}
-          {onToggle && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                onToggle(item.id);
-              }}
-            >
-              {item.completed ? uncompleteButtonText : completeButtonText}
+              <Check className="w-4 h-4" />
+              Save Changes
             </Button>
           )}
         </div>
-        {isEditing && (
-          <Button
-            size="sm"
-            onClick={saveChanges}
-            className="flex items-center gap-2"
-          >
-            <Check className="w-4 h-4" />
-            Save Changes
-          </Button>
-        )}
       </div>
     </Card>
   );
