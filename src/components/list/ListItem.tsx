@@ -6,7 +6,6 @@ import { ItemHeader } from "./ItemHeader";
 import { ItemDescription } from "./ItemDescription";
 import { ItemNotes } from "./ItemNotes";
 import { ItemTags } from "./ItemTags";
-import { useState } from "react";
 
 interface ListItemProps {
   item: BaseItem;
@@ -25,23 +24,33 @@ export function ListItem({
   onNotesChange,
   showDate = false
 }: ListItemProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingNotes, setEditingNotes] = useState(item.notes || "");
-
   return (
     <Card className="p-4">
       <div className="space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <ItemHeader
-            title={item.title}
-            url={item.url || null}
-            completed={item.completed}
-            date={item.date}
-            isEditing={isEditing}
-            editingTitle={item.title}
-            showDate={showDate}
-            onTitleChange={() => {}}
+        {item.image && (
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-full h-48 object-cover rounded-lg"
           />
+        )}
+        
+        <ItemHeader item={item} showDate={showDate} />
+        
+        <ItemDescription item={item} />
+        
+        {item.tags && item.tags.length > 0 && (
+          <ItemTags tags={item.tags} />
+        )}
+
+        {onNotesChange && (
+          <ItemNotes
+            notes={item.notes || ""}
+            onChange={(notes) => onNotesChange(item.id, notes)}
+          />
+        )}
+
+        <div className="flex justify-end gap-2">
           {onToggle && (
             <Button
               variant="ghost"
@@ -53,38 +62,6 @@ export function ListItem({
             </Button>
           )}
         </div>
-
-        <ItemDescription
-          description={item.description || ""}
-          completed={item.completed}
-          isEditing={isEditing}
-          isExpanded={false}
-          editingDescription=""
-          onDescriptionChange={() => {}}
-          onToggleExpand={() => {}}
-        />
-        
-        {item.tags && item.tags.length > 0 && (
-          <ItemTags
-            tags={item.tags}
-            isEditing={isEditing}
-            availableTags={[]}
-            onAddTag={() => {}}
-            onRemoveTag={() => {}}
-          />
-        )}
-
-        {onNotesChange && (
-          <ItemNotes
-            notes={item.notes || ""}
-            isEditing={isEditing}
-            editingNotes={editingNotes}
-            onNotesChange={(notes) => {
-              setEditingNotes(notes);
-              onNotesChange(item.id, notes);
-            }}
-          />
-        )}
       </div>
     </Card>
   );
