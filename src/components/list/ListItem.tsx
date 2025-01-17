@@ -127,8 +127,8 @@ export function ListItem({
       </div>
 
       <div className="p-4 border-t mt-auto">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
+        <div className="flex items-center">
+          <div className="flex gap-2 justify-between w-full">
             {onNotesChange && (
               <Button
                 variant="ghost"
