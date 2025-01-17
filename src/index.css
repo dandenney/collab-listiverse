@@ -34,7 +34,6 @@
  
     --radius: 0.5rem;
 
-    /* Updated sidebar colors to use white background */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222.2 84% 4.9%;
     --sidebar-primary: 215 25% 27%;
@@ -77,4 +76,24 @@
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 300ms, transform 300ms;
+}
+
+@layer utilities {
+  @container (min-width: 400px) {
+    .@sm\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @container (min-width: 700px) {
+    .@lg\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  
+  @container (min-width: 900px) {
+    .@xl\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
 }
