@@ -102,7 +102,7 @@ export function BaseList({
   const hasCompletedItems = items.some(item => item.completed);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-[1400px] mx-auto px-4">
       <ListHeader
         title={title}
         showArchived={showArchived}
@@ -132,14 +132,16 @@ export function BaseList({
         </>
       )}
 
-      <ListItems
-        items={items}
-        completeButtonText={completeButtonText}
-        uncompleteButtonText={uncompleteButtonText}
-        onToggle={!showArchived ? toggleItem : undefined}
-        onNotesChange={!showArchived ? updateItem : undefined}
-        showDate={showDate}
-      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
+        <ListItems
+          items={items}
+          completeButtonText={completeButtonText}
+          uncompleteButtonText={uncompleteButtonText}
+          onToggle={!showArchived ? toggleItem : undefined}
+          onNotesChange={!showArchived ? updateItem : undefined}
+          showDate={showDate}
+        />
+      </div>
     </div>
   );
 }
