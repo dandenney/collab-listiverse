@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
 
 interface GroceryItemProps {
   id: string;
@@ -31,10 +33,14 @@ export function GroceryItem({
     <Card className="p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1">
-          <Checkbox
-            checked={completed}
-            onCheckedChange={onToggle}
-          />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggle}
+            className={completed ? "text-primary" : "text-muted-foreground"}
+          >
+            <Check className="h-4 w-4" />
+          </Button>
           {isEditing ? (
             <Input
               value={editingTitle}
