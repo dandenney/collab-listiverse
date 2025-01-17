@@ -1,7 +1,7 @@
 import { BaseItem } from "@/types/list";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Pencil } from "lucide-react";
 import { ItemHeader } from "./ItemHeader";
 import { ItemDescription } from "./ItemDescription";
 import { ItemNotes } from "./ItemNotes";
@@ -50,16 +50,6 @@ export function ListItem({
             showDate={showDate}
             onTitleChange={() => {}}
           />
-          {onToggle && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onToggle(item.id)}
-              className={item.completed ? "text-primary" : "text-muted-foreground"}
-            >
-              <Check className="h-4 w-4" />
-            </Button>
-          )}
         </div>
 
         <ItemDescription
@@ -93,6 +83,29 @@ export function ListItem({
             }}
           />
         )}
+
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            <Pencil className="h-4 w-4" />
+            {isEditing ? "Save" : "Edit"}
+          </Button>
+          
+          {onToggle && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onToggle(item.id)}
+              className={item.completed ? "text-primary" : "text-muted-foreground"}
+            >
+              <Check className="h-4 w-4 mr-2" />
+              {item.completed ? uncompleteButtonText : completeButtonText}
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );
