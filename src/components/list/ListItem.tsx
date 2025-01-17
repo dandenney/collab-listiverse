@@ -66,7 +66,7 @@ export function ListItem({
   };
 
   return (
-    <Card className={`overflow-hidden ${item.completed ? "bg-muted" : ""}`}>
+    <Card className={`flex flex-col h-full ${item.completed ? "bg-muted" : ""}`}>
       {item.image && (
         <div className="relative h-48 w-full">
           <img
@@ -86,43 +86,18 @@ export function ListItem({
           )}
         </div>
       )}
-      <div className="p-4">
+      <div className="p-4 flex-grow">
         <div className="flex flex-col gap-2">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
-            <ItemHeader
-              title={item.title}
-              url={item.url}
-              completed={item.completed}
-              date={item.date}
-              isEditing={isEditing}
-              editingTitle={editingTitle}
-              showDate={showDate}
-              onTitleChange={setEditingTitle}
-            />
-            <div className="flex gap-2 self-start">
-              {onNotesChange && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={isEditing ? saveChanges : startEditing}
-                >
-                  {isEditing ? <Check className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-                </Button>
-              )}
-              {onToggle && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onToggle(item.id);
-                  }}
-                >
-                  {item.completed ? uncompleteButtonText : completeButtonText}
-                </Button>
-              )}
-            </div>
-          </div>
+          <ItemHeader
+            title={item.title}
+            url={item.url}
+            completed={item.completed}
+            date={item.date}
+            isEditing={isEditing}
+            editingTitle={editingTitle}
+            showDate={showDate}
+            onTitleChange={setEditingTitle}
+          />
 
           <ItemDescription
             description={item.description || ""}
@@ -148,18 +123,41 @@ export function ListItem({
             editingNotes={editingNotes}
             onNotesChange={setEditingNotes}
           />
-
-          {isEditing && (
-            <Button
-              size="sm"
-              onClick={saveChanges}
-              className="flex items-center gap-2"
-            >
-              <Check className="w-4 h-4" />
-              Save Changes
-            </Button>
-          )}
         </div>
+      </div>
+
+      <div className="p-4 border-t mt-auto flex gap-2 justify-end">
+        {onNotesChange && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={isEditing ? saveChanges : startEditing}
+          >
+            {isEditing ? <Check className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
+          </Button>
+        )}
+        {onToggle && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              onToggle(item.id);
+            }}
+          >
+            {item.completed ? uncompleteButtonText : completeButtonText}
+          </Button>
+        )}
+        {isEditing && (
+          <Button
+            size="sm"
+            onClick={saveChanges}
+            className="flex items-center gap-2"
+          >
+            <Check className="w-4 h-4" />
+            Save Changes
+          </Button>
+        )}
       </div>
     </Card>
   );
