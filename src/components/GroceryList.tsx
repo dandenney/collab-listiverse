@@ -113,7 +113,7 @@ export function GroceryList() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-[1400px] mx-auto px-4">
       <GroceryListHeader
         showArchived={showArchived}
         onToggleArchived={() => setShowArchived(!showArchived)}
@@ -128,7 +128,7 @@ export function GroceryList() {
         />
       )}
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
         {items.map((item) => (
           <GroceryItem
             key={item.id}
