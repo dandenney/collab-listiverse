@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BaseItem } from "@/types/list";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,11 +25,26 @@ export function ListItem({
   onNotesChange,
   showDate = false
 }: ListItemProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(item.title);
+  const [editingDescription, setEditingDescription] = useState(item.description || "");
+  const [editingNotes, setEditingNotes] = useState(item.notes || "");
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <Card className="p-4">
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <ItemHeader item={item} showDate={showDate} />
+          <ItemHeader
+            title={item.title}
+            url={item.url}
+            completed={item.completed}
+            date={item.date}
+            isEditing={isEditing}
+            editingTitle={editingTitle}
+            showDate={showDate}
+            onTitleChange={setEditingTitle}
+          />
           {onToggle && (
             <Button
               variant="ghost"
@@ -41,16 +57,40 @@ export function ListItem({
           )}
         </div>
 
-        <ItemDescription item={item} />
+        {(item.description || isEditing) && (
+          <ItemDescription
+            description={item.description || ""}
+            completed={item.completed}
+            isEditing={isEditing}
+            isExpanded={isExpanded}
+            editingDescription={editingDescription}
+            onDescriptionChange={setEditingDescription}
+            onToggleExpand={() => setIsExpanded(!isExpanded)}
+          />
+        )}
         
         {item.tags && item.tags.length > 0 && (
-          <ItemTags tags={item.tags} />
+          <ItemTags
+            tags={item.tags}
+            isEditing={isEditing}
+            availableTags={[]} // You'll need to pass available tags from a parent component
+            onAddTag={(tagId) => {
+              // Handle adding tag
+              console.log('Add tag:', tagId);
+            }}
+            onRemoveTag={(tagName) => {
+              // Handle removing tag
+              console.log('Remove tag:', tagName);
+            }}
+          />
         )}
 
         {onNotesChange && (
           <ItemNotes
             notes={item.notes || ""}
-            onChange={(notes) => onNotesChange(item.id, notes)}
+            isEditing={isEditing}
+            editingNotes={editingNotes}
+            onNotesChange={setEditingNotes}
           />
         )}
       </div>
