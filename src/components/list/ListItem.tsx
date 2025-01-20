@@ -126,13 +126,13 @@ export function ListItem({
         </div>
       </div>
 
-      <div className="p-4 border-t mt-auto">
+      <div className="bg-slate-50 border-t mt-auto p-2">
         <div className="flex items-center">
           <div className="flex gap-2 justify-between w-full">
             {onNotesChange && (
               <Button
-                variant="ghost"
-                size="sm"
+                variant="outline"
+                size="icon"
                 onClick={isEditing ? saveChanges : startEditing}
               >
                 {isEditing ? <Check className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
@@ -140,7 +140,7 @@ export function ListItem({
             )}
             {onToggle && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={(e) => {
                   e.preventDefault();
