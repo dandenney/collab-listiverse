@@ -68,11 +68,11 @@ export function ListItem({
   return (
     <Card className={`flex flex-col h-full ${item.completed ? "bg-muted" : ""}`}>
       {item.image && (
-        <div className="relative h-48 w-full">
+        <div className="bg-slate-50 border-b relative rounded-t h-48 p-4 w-full">
           <img
             src={item.image}
             alt={item.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded"
           />
           {item.url && (
             <a
