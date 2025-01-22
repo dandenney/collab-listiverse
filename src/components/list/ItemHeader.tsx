@@ -47,7 +47,7 @@ export function ItemHeader({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`text-blue-600 hover:underline ${
+                className={`font-bold text-blue-600 text-pretty text-lg hover:underline ${
                 completed ? "line-through text-muted-foreground" : ""
               }`}
             >
@@ -59,7 +59,7 @@ export function ItemHeader({
             </span>
           )}
           {showDate && date && (
-            <div className="text-sm font-medium text-foreground/90 mt-1">
+            <div className="font-medium text-foreground/90 mt-1">
               {formatDate(date)}
             </div>
           )}
