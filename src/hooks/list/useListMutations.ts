@@ -112,8 +112,7 @@ export function useListMutations(listType: ListType) {
   const updateItemMutation = useMutation({
     mutationFn: async (item: BaseItem) => {
       console.log('=== Update Mutation Debug Log ===');
-      console.log('Updating item:', item.id);
-      console.log('New title:', item.title);
+      console.log('Updating item:', item);
 
       // First, get the current item to ensure it exists
       const { data: existingItem, error: fetchError } = await supabase
@@ -131,12 +130,14 @@ export function useListMutations(listType: ListType) {
         throw new Error('Item not found');
       }
 
-      // Prepare update payload, keeping existing values if not provided
+      // Update all editable fields
       const updatePayload = {
-        title: item.title || existingItem.title,
-        description: item.description ?? existingItem.description,
-        notes: item.notes ?? existingItem.notes,
+        title: item.title,
+        description: item.description,
+        notes: item.notes,
       };
+
+      console.log('Update payload:', updatePayload);
 
       // Then update the item
       const { data: updatedItem, error: updateError } = await supabase
