@@ -66,7 +66,7 @@ export function ListItem({
   };
 
   return (
-    <Card className={`flex flex-col h-full ${item.completed ? "bg-muted" : ""}`}>
+    <Card className={`flex flex-col h-full group overflow-hidden relative ${item.completed ? "bg-muted" : ""}`}>
       {item.image && (
         <div className="bg-slate-50 border-b relative rounded-t h-48 p-4 w-full">
           <img
@@ -126,7 +126,7 @@ export function ListItem({
         </div>
       </div>
 
-      <div className="bg-slate-50 border-t mt-auto p-2">
+      <div className="absolute bottom-0 bg-slate-50 border-t ease-in-out left-0 mt-auto p-2 right-0 translate-y-16 transition-transform  group-hover:translate-y-0">
         <div className="flex items-center">
           <div className="flex gap-2 justify-between w-full">
             {onNotesChange && (
