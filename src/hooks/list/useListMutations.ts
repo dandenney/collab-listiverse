@@ -119,7 +119,7 @@ export function useListMutations(listType: ListType) {
         .from('list_items')
         .select('*')
         .eq('id', item.id)
-        .maybeSingle();
+        .single();
 
       if (fetchError) {
         console.error('Fetch error:', fetchError);
@@ -130,21 +130,22 @@ export function useListMutations(listType: ListType) {
         throw new Error('Item not found');
       }
 
-      // Update payload with new values, falling back to existing values
+      // Create update payload with all fields that might be updated
       const updatePayload = {
-        title: item.title !== undefined ? item.title : existingItem.title,
-        description: item.description !== undefined ? item.description : existingItem.description,
-        notes: item.notes !== undefined ? item.notes : existingItem.notes,
+        title: item.title,
+        description: item.description,
+        notes: item.notes,
+        updated_at: new Date().toISOString()
       };
 
       console.log('Update payload:', updatePayload);
 
-      // Then update the item
+      // Perform the update
       const { data: updatedItem, error: updateError } = await supabase
         .from('list_items')
         .update(updatePayload)
         .eq('id', item.id)
-        .select()
+        .select('*')
         .single();
 
       if (updateError) {
