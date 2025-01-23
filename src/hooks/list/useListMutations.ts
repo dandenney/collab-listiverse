@@ -130,11 +130,11 @@ export function useListMutations(listType: ListType) {
         throw new Error('Item not found');
       }
 
-      // Update all editable fields
+      // Update payload with new values, falling back to existing values
       const updatePayload = {
-        title: item.title,
-        description: item.description,
-        notes: item.notes,
+        title: item.title !== undefined ? item.title : existingItem.title,
+        description: item.description !== undefined ? item.description : existingItem.description,
+        notes: item.notes !== undefined ? item.notes : existingItem.notes,
       };
 
       console.log('Update payload:', updatePayload);
@@ -145,15 +145,11 @@ export function useListMutations(listType: ListType) {
         .update(updatePayload)
         .eq('id', item.id)
         .select()
-        .maybeSingle();
+        .single();
 
       if (updateError) {
         console.error('Update error:', updateError);
         throw updateError;
-      }
-
-      if (!updatedItem) {
-        throw new Error('Update failed');
       }
 
       console.log('Update successful:', updatedItem);
