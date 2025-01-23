@@ -112,38 +112,17 @@ export function useListMutations(listType: ListType) {
   const updateItemMutation = useMutation({
     mutationFn: async (item: BaseItem) => {
       console.log('=== Update Mutation Debug Log ===');
-      console.log('Updating item:', item);
+      console.log('Item to update:', item);
 
-      // First, get the current item to ensure it exists
-      const { data: existingItem, error: fetchError } = await supabase
-        .from('list_items')
-        .select('*')
-        .eq('id', item.id)
-        .single();
-
-      if (fetchError) {
-        console.error('Fetch error:', fetchError);
-        throw fetchError;
-      }
-
-      if (!existingItem) {
-        throw new Error('Item not found');
-      }
-
-      // Create update payload with all fields that might be updated
-      const updatePayload = {
-        title: item.title,
-        description: item.description,
-        notes: item.notes,
-        updated_at: new Date().toISOString()
-      };
-
-      console.log('Update payload:', updatePayload);
-
-      // Perform the update
+      // First update the item
       const { data: updatedItem, error: updateError } = await supabase
         .from('list_items')
-        .update(updatePayload)
+        .update({
+          title: item.title,
+          description: item.description,
+          notes: item.notes,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', item.id)
         .select('*')
         .single();
@@ -153,7 +132,7 @@ export function useListMutations(listType: ListType) {
         throw updateError;
       }
 
-      console.log('Update successful:', updatedItem);
+      console.log('Update response:', updatedItem);
       return updatedItem;
     },
     onSuccess: (updatedItem) => {
