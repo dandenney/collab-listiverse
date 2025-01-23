@@ -49,15 +49,16 @@ export function BaseList({
 
     let itemDate = pendingItem.date;
     if (itemDate) {
+      // Create a new Date object from the input date string
       const date = new Date(itemDate);
-      const localDate = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
-      );
-      const offset = localDate.getTimezoneOffset();
-      const adjustedDate = new Date(localDate.getTime() - (offset * 60 * 1000));
-      itemDate = adjustedDate.toISOString();
+      
+      // Create an ISO string and extract just the date part (YYYY-MM-DD)
+      const dateOnly = date.toISOString().split('T')[0];
+      
+      // Set the time to noon UTC to avoid timezone issues
+      itemDate = `${dateOnly}T12:00:00.000Z`;
+      
+      console.log('Saving date as:', itemDate);
     }
 
     const newItem = {
