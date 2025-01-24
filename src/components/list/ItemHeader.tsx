@@ -23,13 +23,24 @@ export function ItemHeader({
   onTitleChange
 }: ItemHeaderProps) {
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const localDate = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate()
-    );
-    return localDate.toLocaleDateString();
+    console.log('dateString', dateString);
+
+    try {
+      // Extract just the date part before creating the Date object
+      const [datePart] = dateString.split('T');
+      const [year, month, day] = datePart.split('-');
+      
+      // Create date using components to avoid timezone conversion
+      const date = new Date(+year, +month - 1, +day);
+      
+      return date.toLocaleDateString('en-US', { 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
   };
 
   return (

@@ -6,8 +6,9 @@ interface ListItemsProps {
   completeButtonText: string;
   uncompleteButtonText: string;
   onToggle?: (id: string) => void;
-  onNotesChange?: (id: string, notes: string) => void;
   showDate?: boolean;
+  showArchived?: boolean;
+  updateItem?: (id: string, updates: Partial<BaseItem>) => void;
 }
 
 export function ListItems({
@@ -15,8 +16,9 @@ export function ListItems({
   completeButtonText,
   uncompleteButtonText,
   onToggle,
-  onNotesChange,
-  showDate = false
+  showDate = false,
+  showArchived = false,
+  updateItem
 }: ListItemsProps) {
   return (
     <>
@@ -27,7 +29,7 @@ export function ListItems({
           completeButtonText={completeButtonText}
           uncompleteButtonText={uncompleteButtonText}
           onToggle={!onToggle ? undefined : onToggle}
-          onNotesChange={!onNotesChange ? undefined : (id, notes) => onNotesChange(id, notes)}
+          onUpdate={!showArchived ? updateItem : undefined}
           showDate={showDate}
         />
       ))}

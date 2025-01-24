@@ -15,22 +15,86 @@ interface ListItemProps {
   completeButtonText: string;
   uncompleteButtonText: string;
   onToggle?: (id: string) => void;
-  onNotesChange?: (id: string, notes: string) => void;
-  onTitleChange?: (id: string, title: string) => void;
-  onDescriptionChange?: (id: string, description: string) => void;
-  onTagsChange?: (id: string, tags: string[]) => void;
+  onUpdate?: (id: string, updates: Partial<BaseItem>) => void;
   showDate?: boolean;
 }
+
+const ActionButtons = ({ 
+  isEditing, 
+  onEdit, 
+  onSave, 
+  onCancel, 
+  onToggle, 
+  item, 
+  completeButtonText, 
+  uncompleteButtonText 
+}: {
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onToggle?: (id: string) => void;
+  item: BaseItem;
+  completeButtonText: string;
+  uncompleteButtonText: string;
+}) => {
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onCancel}
+          className="flex items-center gap-2"
+        >
+          Cancel
+        </Button>
+        <Button
+          size="sm"
+          onClick={onSave}
+          className="flex items-center gap-2"
+        >
+          <Check className="w-4 h-4" />
+          Save
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-2 justify-between w-full">
+      {onEdit && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onEdit}
+        >
+          <Edit2 className="w-4 h-4" />
+        </Button>
+      )}
+      {onToggle && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => {
+            e.preventDefault();
+            onToggle(item.id);
+          }}
+          title={item.completed ? uncompleteButtonText : completeButtonText}
+        >
+          <Check className="w-4 h-4" />
+        </Button>
+      )}
+    </div>
+  );
+};
 
 export function ListItem({
   item,
   completeButtonText,
   uncompleteButtonText,
   onToggle,
-  onNotesChange,
-  onTitleChange,
-  onDescriptionChange,
-  onTagsChange,
+  onUpdate,
   showDate = false
 }: ListItemProps) {
   const [editingTitle, setEditingTitle] = useState(item.title);
@@ -51,36 +115,35 @@ export function ListItem({
   };
 
   const saveChanges = () => {
-    let hasChanges = false;
+    const updates: Partial<BaseItem> = {};
     
-    if (onTitleChange && editingTitle !== item.title) {
-      onTitleChange(item.id, editingTitle);
-      hasChanges = true;
+    if (editingTitle !== item.title) {
+      updates.title = editingTitle;
     }
     
-    if (onDescriptionChange && editingDescription !== item.description) {
-      onDescriptionChange(item.id, editingDescription);
-      hasChanges = true;
+    if (editingDescription !== item.description) {
+      updates.description = editingDescription;
     }
     
-    if (onNotesChange && editingNotes !== item.notes) {
-      onNotesChange(item.id, editingNotes);
-      hasChanges = true;
+    if (editingNotes !== item.notes) {
+      updates.notes = editingNotes;
     }
     
-    if (onTagsChange && JSON.stringify(editingTags) !== JSON.stringify(item.tags)) {
-      onTagsChange(item.id, editingTags);
-      hasChanges = true;
+    if (JSON.stringify(editingTags) !== JSON.stringify(item.tags)) {
+      updates.tags = editingTags;
     }
 
-    setIsEditing(false);
+    const hasChanges = Object.keys(updates).length > 0;
     
-    if (hasChanges) {
+    if (hasChanges && onUpdate) {
+      onUpdate(item.id, updates);
       toast({
         title: "Changes saved",
         description: "Your changes have been updated"
       });
     }
+
+    setIsEditing(false);
   };
 
   const addTag = (tagId: string) => {
@@ -154,42 +217,18 @@ export function ListItem({
         </div>
       </div>
 
-      <div className="absolute bottom-0 bg-slate-50 border-t ease-in-out left-0 mt-auto p-2 right-0 translate-y-16 transition-transform  group-hover:translate-y-0">
+      <div className="absolute bottom-0 bg-slate-50 border-t ease-in-out left-0 mt-auto p-2 right-0 translate-y-16 transition-transform group-hover:translate-y-0">
         <div className="flex items-center">
-          <div className="flex gap-2 justify-between w-full">
-            {onNotesChange && (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={isEditing ? saveChanges : startEditing}
-              >
-                {isEditing ? <Check className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-              </Button>
-            )}
-            {onToggle && (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onToggle(item.id);
-                }}
-                title={item.completed ? uncompleteButtonText : completeButtonText}
-              >
-                <Check className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-          {isEditing && (
-            <Button
-              size="sm"
-              onClick={saveChanges}
-              className="flex items-center gap-2"
-            >
-              <Check className="w-4 h-4" />
-              Save Changes
-            </Button>
-          )}
+          <ActionButtons
+            isEditing={isEditing}
+            onEdit={startEditing}
+            onSave={saveChanges}
+            onCancel={() => setIsEditing(false)}
+            onToggle={onToggle}
+            item={item}
+            completeButtonText={completeButtonText}
+            uncompleteButtonText={uncompleteButtonText}
+          />
         </div>
       </div>
     </Card>
