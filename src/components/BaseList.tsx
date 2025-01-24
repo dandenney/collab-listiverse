@@ -48,17 +48,11 @@ export function BaseList({
     if (!pendingItem) return;
 
     let itemDate = pendingItem.date;
+
     if (itemDate) {
-      // Create a new Date object from the input date string
-      const date = new Date(itemDate);
-      
-      // Create an ISO string and extract just the date part (YYYY-MM-DD)
-      const dateOnly = date.toISOString().split('T')[0];
-      
-      // Set the time to noon UTC to avoid timezone issues
-      itemDate = `${dateOnly}T12:00:00.000Z`;
-      
-      console.log('Saving date as:', itemDate);
+      // Ensure we keep the exact date entered by the user
+      const [year, month, day] = itemDate.split('-');
+      itemDate = `${year}-${month}-${day}`;
     }
 
     const newItem = {
