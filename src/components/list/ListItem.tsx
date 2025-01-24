@@ -16,6 +16,9 @@ interface ListItemProps {
   uncompleteButtonText: string;
   onToggle?: (id: string) => void;
   onNotesChange?: (id: string, notes: string) => void;
+  onTitleChange?: (id: string, title: string) => void;
+  onDescriptionChange?: (id: string, description: string) => void;
+  onTagsChange?: (id: string, tags: string[]) => void;
   showDate?: boolean;
 }
 
@@ -25,6 +28,9 @@ export function ListItem({
   uncompleteButtonText,
   onToggle,
   onNotesChange,
+  onTitleChange,
+  onDescriptionChange,
+  onTagsChange,
   showDate = false
 }: ListItemProps) {
   const [editingTitle, setEditingTitle] = useState(item.title);
@@ -45,9 +51,31 @@ export function ListItem({
   };
 
   const saveChanges = () => {
-    if (onNotesChange) {
+    let hasChanges = false;
+    
+    if (onTitleChange && editingTitle !== item.title) {
+      onTitleChange(item.id, editingTitle);
+      hasChanges = true;
+    }
+    
+    if (onDescriptionChange && editingDescription !== item.description) {
+      onDescriptionChange(item.id, editingDescription);
+      hasChanges = true;
+    }
+    
+    if (onNotesChange && editingNotes !== item.notes) {
       onNotesChange(item.id, editingNotes);
-      setIsEditing(false);
+      hasChanges = true;
+    }
+    
+    if (onTagsChange && JSON.stringify(editingTags) !== JSON.stringify(item.tags)) {
+      onTagsChange(item.id, editingTags);
+      hasChanges = true;
+    }
+
+    setIsEditing(false);
+    
+    if (hasChanges) {
       toast({
         title: "Changes saved",
         description: "Your changes have been updated"
