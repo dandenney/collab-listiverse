@@ -86,13 +86,13 @@ export function BaseList({
     }
   };
 
-  const updateItem = (id: string, notes: string) => {
+  const updateItem = (id: string, updates: Partial<BaseItem>) => {
     const item = items.find(item => item.id === id);
     if (!item) return;
 
     updateItemMutation.mutate({
       ...item,
-      notes
+      ...updates
     });
   };
 
@@ -140,7 +140,7 @@ export function BaseList({
             completeButtonText={completeButtonText}
             uncompleteButtonText={uncompleteButtonText}
             onToggle={!showArchived ? toggleItem : undefined}
-            onNotesChange={!showArchived ? updateItem : undefined}
+            updateItem={updateItem}
             showDate={showDate}
           />
         </div>

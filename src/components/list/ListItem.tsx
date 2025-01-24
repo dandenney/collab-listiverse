@@ -15,10 +15,7 @@ interface ListItemProps {
   completeButtonText: string;
   uncompleteButtonText: string;
   onToggle?: (id: string) => void;
-  onNotesChange?: (id: string, notes: string) => void;
-  onTitleChange?: (id: string, title: string) => void;
-  onDescriptionChange?: (id: string, description: string) => void;
-  onTagsChange?: (id: string, tags: string[]) => void;
+  onUpdate?: (id: string, updates: Partial<BaseItem>) => void;
   showDate?: boolean;
 }
 
@@ -27,10 +24,7 @@ export function ListItem({
   completeButtonText,
   uncompleteButtonText,
   onToggle,
-  onNotesChange,
-  onTitleChange,
-  onDescriptionChange,
-  onTagsChange,
+  onUpdate,
   showDate = false
 }: ListItemProps) {
   const [editingTitle, setEditingTitle] = useState(item.title);
@@ -51,36 +45,35 @@ export function ListItem({
   };
 
   const saveChanges = () => {
-    let hasChanges = false;
+    const updates: Partial<BaseItem> = {};
     
-    if (onTitleChange && editingTitle !== item.title) {
-      onTitleChange(item.id, editingTitle);
-      hasChanges = true;
+    if (editingTitle !== item.title) {
+      updates.title = editingTitle;
     }
     
-    if (onDescriptionChange && editingDescription !== item.description) {
-      onDescriptionChange(item.id, editingDescription);
-      hasChanges = true;
+    if (editingDescription !== item.description) {
+      updates.description = editingDescription;
     }
     
-    if (onNotesChange && editingNotes !== item.notes) {
-      onNotesChange(item.id, editingNotes);
-      hasChanges = true;
+    if (editingNotes !== item.notes) {
+      updates.notes = editingNotes;
     }
     
-    if (onTagsChange && JSON.stringify(editingTags) !== JSON.stringify(item.tags)) {
-      onTagsChange(item.id, editingTags);
-      hasChanges = true;
+    if (JSON.stringify(editingTags) !== JSON.stringify(item.tags)) {
+      updates.tags = editingTags;
     }
 
-    setIsEditing(false);
+    const hasChanges = Object.keys(updates).length > 0;
     
-    if (hasChanges) {
+    if (hasChanges && onUpdate) {
+      onUpdate(item.id, updates);
       toast({
         title: "Changes saved",
         description: "Your changes have been updated"
       });
     }
+
+    setIsEditing(false);
   };
 
   const addTag = (tagId: string) => {
@@ -157,7 +150,7 @@ export function ListItem({
       <div className="absolute bottom-0 bg-slate-50 border-t ease-in-out left-0 mt-auto p-2 right-0 translate-y-16 transition-transform  group-hover:translate-y-0">
         <div className="flex items-center">
           <div className="flex gap-2 justify-between w-full">
-            {onNotesChange && (
+            {onUpdate && (
               <Button
                 variant="outline"
                 size="icon"
