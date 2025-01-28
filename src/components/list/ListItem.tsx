@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Edit2, Check, ExternalLink } from "lucide-react";
-import { BaseItem } from "@/types/list";
+import { BaseItem, ListType } from "@/types/list";
 import { useToast } from "@/hooks/use-toast";
 import { useTags } from "@/hooks/useTags";
 import { ItemHeader } from "./ItemHeader";
@@ -17,6 +17,7 @@ interface ListItemProps {
   onToggle?: (id: string) => void;
   onUpdate?: (id: string, updates: Partial<BaseItem>) => void;
   showDate?: boolean;
+  listType: ListType;
 }
 
 const ActionButtons = ({ 
@@ -95,7 +96,8 @@ export function ListItem({
   uncompleteButtonText,
   onToggle,
   onUpdate,
-  showDate = false
+  showDate = false,
+  listType
 }: ListItemProps) {
   const [editingTitle, setEditingTitle] = useState(item.title);
   const [editingDescription, setEditingDescription] = useState(item.description || "");
@@ -104,7 +106,7 @@ export function ListItem({
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
-  const { tags: availableTags = [] } = useTags();
+  const { tags: availableTags = [] } = useTags(listType);
 
   const startEditing = () => {
     setEditingTitle(item.title);

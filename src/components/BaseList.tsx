@@ -136,6 +136,7 @@ export function BaseList({
             onToggle={!showArchived ? toggleItem : undefined}
             updateItem={updateItem}
             showDate={showDate}
+            listType={listType}
           />
         </div>
       </div>

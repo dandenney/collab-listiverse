@@ -1,4 +1,4 @@
-import { BaseItem } from "@/types/list";
+import { BaseItem, ListType } from "@/types/list";
 import { ListItem } from "./ListItem";
 
 interface ListItemsProps {
@@ -9,6 +9,7 @@ interface ListItemsProps {
   showDate?: boolean;
   showArchived?: boolean;
   updateItem?: (id: string, updates: Partial<BaseItem>) => void;
+  listType: ListType;
 }
 
 export function ListItems({
@@ -18,7 +19,8 @@ export function ListItems({
   onToggle,
   showDate = false,
   showArchived = false,
-  updateItem
+  updateItem,
+  listType
 }: ListItemsProps) {
   return (
     <>
@@ -31,6 +33,7 @@ export function ListItems({
           onToggle={!onToggle ? undefined : onToggle}
           onUpdate={!showArchived ? updateItem : undefined}
           showDate={showDate}
+          listType={listType}
         />
       ))}
     </>
