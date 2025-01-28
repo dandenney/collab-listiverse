@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTags } from "@/hooks/useTags";
 import { ItemActions } from "./item/ItemActions";
 import { ItemContent } from "./item/ItemContent";
+import { ItemTags } from "./ItemTags";
 
 interface ListItemProps {
   item: BaseItem;
@@ -120,6 +121,17 @@ export function ListItem({
           setEditingTags(editingTags.filter(t => t !== tagName));
         }}
       />
+
+      {/* Display tags below content */}
+      <div className="px-4 pb-2">
+        <ItemTags
+          tags={item.tags || []}
+          isEditing={false}
+          availableTags={availableTags}
+          onAddTag={() => {}}
+          onRemoveTag={() => {}}
+        />
+      </div>
 
       <div className="absolute bottom-0 bg-slate-50 border-t ease-in-out left-0 mt-auto p-2 right-0 translate-y-16 transition-transform group-hover:translate-y-0">
         <div className="flex items-center">
