@@ -119,7 +119,6 @@ export function BaseList({
               pendingItem={pendingItem}
               onPendingItemChange={setPendingItem}
               onSave={savePendingItem}
-              availableTags={tags}
               showDate={showDate}
               listType={listType}
             />
