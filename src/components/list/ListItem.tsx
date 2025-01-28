@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Edit2, Check, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { BaseItem, ListType } from "@/types/list";
 import { useToast } from "@/hooks/use-toast";
 import { useTags } from "@/hooks/useTags";
-import { ItemHeader } from "./ItemHeader";
-import { ItemDescription } from "./ItemDescription";
-import { ItemTags } from "./ItemTags";
-import { ItemNotes } from "./ItemNotes";
+import { ItemActions } from "./item/ItemActions";
+import { ItemContent } from "./item/ItemContent";
 
 interface ListItemProps {
   item: BaseItem;
@@ -19,76 +16,6 @@ interface ListItemProps {
   showDate?: boolean;
   listType: ListType;
 }
-
-const ActionButtons = ({ 
-  isEditing, 
-  onEdit, 
-  onSave, 
-  onCancel, 
-  onToggle, 
-  item, 
-  completeButtonText, 
-  uncompleteButtonText 
-}: {
-  isEditing: boolean;
-  onEdit: () => void;
-  onSave: () => void;
-  onCancel: () => void;
-  onToggle?: (id: string) => void;
-  item: BaseItem;
-  completeButtonText: string;
-  uncompleteButtonText: string;
-}) => {
-  if (isEditing) {
-    return (
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onCancel}
-          className="flex items-center gap-2"
-        >
-          Cancel
-        </Button>
-        <Button
-          size="sm"
-          onClick={onSave}
-          className="flex items-center gap-2"
-        >
-          <Check className="w-4 h-4" />
-          Save
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex gap-2 justify-between w-full">
-      {onEdit && (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onEdit}
-        >
-          <Edit2 className="w-4 h-4" />
-        </Button>
-      )}
-      {onToggle && (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={(e) => {
-            e.preventDefault();
-            onToggle(item.id);
-          }}
-          title={item.completed ? uncompleteButtonText : completeButtonText}
-        >
-          <Check className="w-4 h-4" />
-        </Button>
-      )}
-    </div>
-  );
-};
 
 export function ListItem({
   item,
@@ -148,16 +75,6 @@ export function ListItem({
     setIsEditing(false);
   };
 
-  const addTag = (tagId: string) => {
-    const tag = availableTags.find(t => t.id === tagId);
-    if (!tag || editingTags.includes(tag.name)) return;
-    setEditingTags([...editingTags, tag.name]);
-  };
-
-  const removeTag = (tagName: string) => {
-    setEditingTags(editingTags.filter(t => t !== tagName));
-  };
-
   return (
     <Card className={`flex flex-col h-full group overflow-hidden relative ${item.completed ? "bg-muted" : ""}`}>
       {item.image && (
@@ -179,49 +96,34 @@ export function ListItem({
           )}
         </div>
       )}
-      <div className="p-4 flex-grow">
-        <div className="flex flex-col gap-2">
-          <ItemHeader
-            title={item.title}
-            url={item.url}
-            completed={item.completed}
-            date={item.date}
-            isEditing={isEditing}
-            editingTitle={editingTitle}
-            showDate={showDate}
-            onTitleChange={setEditingTitle}
-          />
 
-          <ItemDescription
-            description={item.description || ""}
-            completed={item.completed}
-            isEditing={isEditing}
-            isExpanded={isExpanded}
-            editingDescription={editingDescription}
-            onDescriptionChange={setEditingDescription}
-            onToggleExpand={() => setIsExpanded(!isExpanded)}
-          />
-
-          <ItemTags
-            tags={isEditing ? editingTags : (item.tags || [])}
-            isEditing={isEditing}
-            availableTags={availableTags}
-            onAddTag={addTag}
-            onRemoveTag={removeTag}
-          />
-
-          <ItemNotes
-            notes={item.notes || ""}
-            isEditing={isEditing}
-            editingNotes={editingNotes}
-            onNotesChange={setEditingNotes}
-          />
-        </div>
-      </div>
+      <ItemContent
+        item={item}
+        isEditing={isEditing}
+        isExpanded={isExpanded}
+        editingTitle={editingTitle}
+        editingDescription={editingDescription}
+        editingNotes={editingNotes}
+        editingTags={editingTags}
+        showDate={showDate}
+        onTitleChange={setEditingTitle}
+        onDescriptionChange={setEditingDescription}
+        onNotesChange={setEditingNotes}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        availableTags={availableTags}
+        onAddTag={(tagId) => {
+          const tag = availableTags.find(t => t.id === tagId);
+          if (!tag || editingTags.includes(tag.name)) return;
+          setEditingTags([...editingTags, tag.name]);
+        }}
+        onRemoveTag={(tagName) => {
+          setEditingTags(editingTags.filter(t => t !== tagName));
+        }}
+      />
 
       <div className="absolute bottom-0 bg-slate-50 border-t ease-in-out left-0 mt-auto p-2 right-0 translate-y-16 transition-transform group-hover:translate-y-0">
         <div className="flex items-center">
-          <ActionButtons
+          <ItemActions
             isEditing={isEditing}
             onEdit={startEditing}
             onSave={saveChanges}
