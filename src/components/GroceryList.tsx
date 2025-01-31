@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useListItems } from "@/hooks/useListItems";
-import { useToast } from "@/hooks/use-toast";
 import { GroceryListHeader } from "./grocery/GroceryListHeader";
 import { AddGroceryItem } from "./grocery/AddGroceryItem";
 import { GroceryItem } from "./grocery/GroceryItem";
@@ -14,7 +13,6 @@ export function GroceryList() {
   const [newItem, setNewItem] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
-  const { toast } = useToast();
 
   const {
     query: { data: items = [], refetch },
@@ -54,31 +52,18 @@ export function GroceryList() {
     const item = items.find(item => item.id === id);
     if (!item) return;
 
-    try {
-      const updatedItem = {
-        ...item,
-        title: newTitle.trim()
-      };
-      
-      await updateItemMutation.mutateAsync(updatedItem, {
-        onSuccess: () => {
-          refetch();
-        }
-      });
-      
-      toast({
-        title: "Item Updated",
-        description: `Changed "${item.title}" to "${newTitle.trim()}"`,
-      });
-    } catch (error) {
-      toast({
-        title: "Update Failed",
-        description: "Could not update the item. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setEditingItem(null);
-    }
+    const updatedItem = {
+      ...item,
+      title: newTitle.trim()
+    };
+    
+    await updateItemMutation.mutateAsync(updatedItem, {
+      onSuccess: () => {
+        refetch();
+      }
+    });
+    
+    setEditingItem(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
@@ -100,14 +85,7 @@ export function GroceryList() {
 
   const archiveCompleted = () => {
     const completedItems = items.filter(item => item.completed);
-    if (completedItems.length === 0) {
-      toast({
-        title: "No items to archive",
-        description: "Complete some items first!",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (completedItems.length === 0) return;
     
     archiveCompletedMutation.mutate();
   };
