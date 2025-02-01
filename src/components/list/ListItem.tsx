@@ -63,6 +63,7 @@ export function ListItem({
     const hasChanges = Object.keys(updates).length > 0;
     
     if (hasChanges && onUpdate) {
+      console.log('Saving updates:', updates);
       onUpdate(item.id, updates);
     }
 
