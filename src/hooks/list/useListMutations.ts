@@ -65,18 +65,22 @@ export function useListMutations(listType: ListType) {
     onSuccess: (data) => {
       console.log('Mutation completed successfully with data:', data);
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
-      toast({
-        title: "Item Added",
-        description: "Your item has been added to the list"
-      });
+      if (listType !== 'grocery') {
+        toast({
+          title: "Item Added",
+          description: "Your item has been added to the list"
+        });
+      }
     },
     onError: (error) => {
       console.error('Mutation failed:', error);
-      toast({
-        title: "Failed to add item",
-        description: "There was an error adding your item",
-        variant: "destructive"
-      });
+      if (listType !== 'grocery') {
+        toast({
+          title: "Failed to add item",
+          description: "There was an error adding your item",
+          variant: "destructive"
+        });
+      }
     }
   });
 
@@ -102,10 +106,12 @@ export function useListMutations(listType: ListType) {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
-      toast({
-        title: data.completed ? "Item Completed" : "Item Uncompleted",
-        description: data.title
-      });
+      if (listType !== 'grocery') {
+        toast({
+          title: data.completed ? "Item Completed" : "Item Uncompleted",
+          description: data.title
+        });
+      }
     }
   });
 
@@ -114,7 +120,6 @@ export function useListMutations(listType: ListType) {
       console.log('=== Update Mutation Debug Log ===');
       console.log('Item to update:', item);
 
-      // First update the item
       const { data: updatedItem, error: updateError } = await supabase
         .from('list_items')
         .update({
@@ -138,18 +143,22 @@ export function useListMutations(listType: ListType) {
     onSuccess: (updatedItem) => {
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
       
-      toast({
-        title: "Item Updated",
-        description: "Your changes have been saved"
-      });
+      if (listType !== 'grocery') {
+        toast({
+          title: "Item Updated",
+          description: "Your changes have been saved"
+        });
+      }
     },
     onError: (error) => {
       console.error('Update failed:', error);
-      toast({
-        title: "Update Failed",
-        description: "Failed to save your changes. Please try again.",
-        variant: "destructive"
-      });
+      if (listType !== 'grocery') {
+        toast({
+          title: "Update Failed",
+          description: "Failed to save your changes. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   });
 
@@ -165,10 +174,12 @@ export function useListMutations(listType: ListType) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
-      toast({
-        title: "Items Archived",
-        description: "Completed items have been archived"
-      });
+      if (listType !== 'grocery') {
+        toast({
+          title: "Items Archived",
+          description: "Completed items have been archived"
+        });
+      }
     }
   });
 
