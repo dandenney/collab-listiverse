@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import mql from '@microlink/mql';
 import { PendingItem, Metadata } from "@/types/list";
 
@@ -15,7 +14,6 @@ interface AddItemFormProps {
 export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = true }: AddItemFormProps) {
   const [newUrl, setNewUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const getPlaceholderImage = () => {
     const placeholders = [
@@ -73,11 +71,6 @@ export function AddItemForm({ urlPlaceholder, onPendingItem, isUrlRequired = tru
       setNewUrl("");
     } catch (error) {
       console.error('Error in handleSubmit:', error);
-      toast({
-        title: isUrlRequired ? "Error fetching metadata" : "Error adding item",
-        description: isUrlRequired ? "Please enter a valid URL" : "Please try again",
-        variant: "destructive"
-      });
     } finally {
       setIsLoading(false);
     }

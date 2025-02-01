@@ -1,10 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tag, ListType } from "@/types/list";
-import { useToast } from "./use-toast";
 
 export function useTags(listType?: ListType) {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const tagsQuery = useQuery({
@@ -63,18 +61,9 @@ export function useTags(listType?: ListType) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags', listType] });
-      toast({
-        title: "Tag Created",
-        description: "Your new tag has been created successfully"
-      });
     },
     onError: (error) => {
       console.error('Error creating tag:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create tag. Please try again.",
-        variant: "destructive"
-      });
     }
   });
 

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { BaseItem, ListType } from "@/types/list";
-import { useToast } from "@/hooks/use-toast";
 import { useTags } from "@/hooks/useTags";
 import { ItemActions } from "./item/ItemActions";
 import { ItemContent } from "./item/ItemContent";
@@ -33,7 +32,6 @@ export function ListItem({
   const [editingTags, setEditingTags] = useState(item.tags || []);
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const { toast } = useToast();
   const { tags: availableTags = [] } = useTags(listType);
 
   const startEditing = () => {
@@ -67,10 +65,6 @@ export function ListItem({
     
     if (hasChanges && onUpdate) {
       onUpdate(item.id, updates);
-      toast({
-        title: "Changes saved",
-        description: "Your changes have been updated"
-      });
     }
 
     setIsEditing(false);
@@ -122,7 +116,6 @@ export function ListItem({
         }}
       />
 
-      {/* Display tags below content */}
       <div className="px-4 pb-2">
         <ItemTags
           tags={item.tags || []}

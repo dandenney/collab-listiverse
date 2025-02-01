@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTags } from "@/hooks/useTags";
 import { ListType } from "@/types/list";
@@ -22,7 +21,6 @@ interface ManageTagsDialogProps {
 
 export function ManageTagsDialog({ children, listType }: ManageTagsDialogProps) {
   const [newTag, setNewTag] = useState("");
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const { tags = [] } = useTags(listType);
 
@@ -47,10 +45,6 @@ export function ManageTagsDialog({ children, listType }: ManageTagsDialogProps) 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags'] });
-      toast({
-        title: "Tag added",
-        description: "The new tag has been created"
-      });
     }
   });
 
@@ -65,10 +59,6 @@ export function ManageTagsDialog({ children, listType }: ManageTagsDialogProps) 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags'] });
-      toast({
-        title: "Tag removed",
-        description: "The tag has been deleted"
-      });
     }
   });
 

@@ -3,7 +3,6 @@ import { BaseList } from "./BaseList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X, Tag as TagIcon } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTags } from "@/hooks/useTags";
@@ -17,7 +16,6 @@ import {
 
 export function LocalList() {
   const [newTag, setNewTag] = useState("");
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const { tags = [] } = useTags("local");
 
@@ -42,10 +40,6 @@ export function LocalList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags'] });
-      toast({
-        title: "Tag added",
-        description: "The new tag has been created"
-      });
     }
   });
 
@@ -60,10 +54,6 @@ export function LocalList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags'] });
-      toast({
-        title: "Tag removed",
-        description: "The tag has been deleted"
-      });
     }
   });
 

@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface ListActionsProps {
   showArchived: boolean;
@@ -15,20 +14,6 @@ export function ListActions({
   onArchiveCompleted,
   hasCompletedItems
 }: ListActionsProps) {
-  const { toast } = useToast();
-
-  const handleArchiveCompleted = () => {
-    if (!hasCompletedItems) {
-      toast({
-        title: "No items to archive",
-        description: "Complete some items first!",
-        variant: "destructive"
-      });
-      return;
-    }
-    onArchiveCompleted();
-  };
-
   return (
     <div className="flex gap-2">
       <Button
@@ -38,10 +23,10 @@ export function ListActions({
       >
         {showArchived ? "Show Active" : "Show Archived"}
       </Button>
-      {!showArchived && (
+      {!showArchived && hasCompletedItems && (
         <Button
           variant="outline"
-          onClick={handleArchiveCompleted}
+          onClick={onArchiveCompleted}
           className="flex items-center gap-2 hover:bg-accent hover:text-accent-foreground"
         >
           <Archive className="w-4 h-4" />
