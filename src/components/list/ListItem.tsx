@@ -34,6 +34,7 @@ export function ListItem({
   const { tags: availableTags = [] } = useTags(listType);
 
   const startEditing = () => {
+    console.log('Starting edit mode with current item:', item);
     setEditingTitle(item.title);
     setEditingDescription(item.description || "");
     setEditingNotes(item.notes || "");
@@ -42,29 +43,46 @@ export function ListItem({
   };
 
   const saveChanges = () => {
+    console.log('Attempting to save changes...');
+    console.log('Current item:', item);
+    console.log('Editing state:', {
+      title: editingTitle,
+      description: editingDescription,
+      notes: editingNotes,
+      tags: editingTags
+    });
+
     const updates: Partial<BaseItem> = {};
     
     if (editingTitle !== item.title) {
+      console.log('Title changed from:', item.title, 'to:', editingTitle);
       updates.title = editingTitle;
     }
     
     if (editingDescription !== item.description) {
+      console.log('Description changed from:', item.description, 'to:', editingDescription);
       updates.description = editingDescription;
     }
     
     if (editingNotes !== item.notes) {
+      console.log('Notes changed from:', item.notes, 'to:', editingNotes);
       updates.notes = editingNotes;
     }
     
     if (JSON.stringify(editingTags) !== JSON.stringify(item.tags)) {
+      console.log('Tags changed from:', item.tags, 'to:', editingTags);
       updates.tags = editingTags;
     }
 
     const hasChanges = Object.keys(updates).length > 0;
+    console.log('Updates to be saved:', updates);
+    console.log('Has changes:', hasChanges);
     
     if (hasChanges && onUpdate) {
-      console.log('Saving updates:', updates);
+      console.log('Calling onUpdate with:', { id: item.id, updates });
       onUpdate(item.id, updates);
+    } else {
+      console.log('No changes to save or onUpdate not provided');
     }
 
     setIsEditing(false);
@@ -107,12 +125,25 @@ export function ListItem({
         onToggleExpand={() => setIsExpanded(!isExpanded)}
         availableTags={availableTags}
         onAddTag={(tagId) => {
+          console.log('Adding tag with ID:', tagId);
           const tag = availableTags.find(t => t.id === tagId);
-          if (!tag || editingTags.includes(tag.name)) return;
-          setEditingTags([...editingTags, tag.name]);
+          if (!tag) {
+            console.log('Tag not found in available tags');
+            return;
+          }
+          if (editingTags.includes(tag.name)) {
+            console.log('Tag already exists in editing tags');
+            return;
+          }
+          const newTags = [...editingTags, tag.name];
+          console.log('New tags array:', newTags);
+          setEditingTags(newTags);
         }}
         onRemoveTag={(tagName) => {
-          setEditingTags(editingTags.filter(t => t !== tagName));
+          console.log('Removing tag:', tagName);
+          const newTags = editingTags.filter(t => t !== tagName);
+          console.log('New tags array after removal:', newTags);
+          setEditingTags(newTags);
         }}
       />
 
