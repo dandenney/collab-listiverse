@@ -37,7 +37,6 @@ export function ListItem({
   const { tags: availableTags = [] } = useTags(listType);
 
   const startEditing = () => {
-    console.log('Starting edit mode with current item:', item);
     setEditingTitle(item.title);
     setEditingDescription(item.description || "");
     setEditingNotes(item.notes || "");
@@ -59,16 +58,6 @@ export function ListItem({
   };
 
   const saveChanges = () => {
-    console.log('Attempting to save changes...');
-    console.log('Current item:', item);
-    console.log('Editing state:', {
-      title: editingTitle,
-      description: editingDescription,
-      notes: editingNotes,
-      tags: editingTags,
-      image: editingImage
-    });
-
     const updates: Partial<BaseItem> = {};
     
     if (editingTitle !== item.title) {
@@ -92,11 +81,8 @@ export function ListItem({
     }
 
     const hasChanges = Object.keys(updates).length > 0;
-    console.log('Updates to be saved:', updates);
-    console.log('Has changes:', hasChanges);
     
     if (hasChanges && onUpdate) {
-      console.log('Calling onUpdate with:', { id: item.id, updates });
       onUpdate(item.id, updates);
     }
 
@@ -120,46 +106,22 @@ export function ListItem({
       className={`flex flex-col h-full group overflow-hidden relative ${item.completed ? "bg-muted" : ""}`}
       data-item-id={item.id}
     >
-      {(item.image || isEditing) && (
+      {!isEditing && item.image && (
         <div className="bg-slate-50 border-b relative rounded-t h-48 p-4 w-full">
-          {isEditing ? (
-            <div className="h-full flex flex-col gap-2">
-              <Input
-                type="url"
-                placeholder="Enter image URL..."
-                value={editingImage}
-                onChange={(e) => setEditingImage(e.target.value)}
-                className="w-full"
-              />
-              {editingImage && (
-                <div className="flex-1 relative">
-                  <img
-                    src={editingImage}
-                    alt={editingTitle}
-                    className="w-full h-full object-cover rounded"
-                    onError={() => setEditingImage("")}
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full h-full object-cover rounded"
-              />
-              {item.url && (
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
-            </>
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-full h-full object-cover rounded"
+          />
+          {item.url && (
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
           )}
         </div>
       )}
@@ -172,32 +134,21 @@ export function ListItem({
         editingDescription={editingDescription}
         editingNotes={editingNotes}
         editingTags={editingTags}
+        editingImage={editingImage}
         showDate={showDate}
         onTitleChange={setEditingTitle}
         onDescriptionChange={setEditingDescription}
         onNotesChange={setEditingNotes}
+        onImageChange={setEditingImage}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
         availableTags={availableTags}
         onAddTag={(tagId) => {
-          console.log('Adding tag with ID:', tagId);
           const tag = availableTags.find(t => t.id === tagId);
-          if (!tag) {
-            console.log('Tag not found in available tags');
-            return;
-          }
-          if (editingTags.includes(tag.name)) {
-            console.log('Tag already exists in editing tags');
-            return;
-          }
-          const newTags = [...editingTags, tag.name];
-          console.log('New tags array:', newTags);
-          setEditingTags(newTags);
+          if (!tag || editingTags.includes(tag.name)) return;
+          setEditingTags([...editingTags, tag.name]);
         }}
         onRemoveTag={(tagName) => {
-          console.log('Removing tag:', tagName);
-          const newTags = editingTags.filter(t => t !== tagName);
-          console.log('New tags array after removal:', newTags);
-          setEditingTags(newTags);
+          setEditingTags(editingTags.filter(t => t !== tagName));
         }}
       />
 
