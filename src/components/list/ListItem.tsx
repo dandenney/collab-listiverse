@@ -121,7 +121,7 @@ export function ListItem({
       data-item-id={item.id}
     >
       {(item.image || isEditing) && (
-        <div className="bg-slate-50 border-b relative h-48 p-4 w-full">
+        <div className="bg-slate-50 border-b relative rounded-t h-48 p-4 w-full">
           {isEditing ? (
             <div className="h-full flex flex-col gap-2">
               <Input
@@ -132,22 +132,22 @@ export function ListItem({
                 className="w-full"
               />
               {editingImage && (
-                <div className="flex-1 relative overflow-hidden">
+                <div className="flex-1 relative">
                   <img
                     src={editingImage}
                     alt={editingTitle}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover rounded"
                     onError={() => setEditingImage("")}
                   />
                 </div>
               )}
             </div>
-          ) : item.image && (
-            <div className="h-full relative">
+          ) : (
+            <>
               <img
                 src={item.image}
                 alt={item.title}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover rounded"
               />
               {item.url && (
                 <a
@@ -159,7 +159,7 @@ export function ListItem({
                   <ExternalLink className="w-4 h-4" />
                 </a>
               )}
-            </div>
+            </>
           )}
         </div>
       )}
