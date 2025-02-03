@@ -4,7 +4,6 @@ import { ItemHeader } from "../ItemHeader";
 import { ItemDescription } from "../ItemDescription";
 import { ItemTags } from "../ItemTags";
 import { ItemNotes } from "../ItemNotes";
-import { Input } from "@/components/ui/input";
 
 interface ItemContentProps {
   item: BaseItem;
@@ -14,12 +13,10 @@ interface ItemContentProps {
   editingDescription: string;
   editingNotes: string;
   editingTags: string[];
-  editingImage: string;
   showDate?: boolean;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onNotesChange: (value: string) => void;
-  onImageChange: (value: string) => void;
   onToggleExpand: () => void;
   availableTags: any[];
   onAddTag: (tagId: string) => void;
@@ -34,12 +31,10 @@ export function ItemContent({
   editingDescription,
   editingNotes,
   editingTags,
-  editingImage,
   showDate,
   onTitleChange,
   onDescriptionChange,
   onNotesChange,
-  onImageChange,
   onToggleExpand,
   availableTags,
   onAddTag,
@@ -58,29 +53,6 @@ export function ItemContent({
           showDate={showDate}
           onTitleChange={onTitleChange}
         />
-
-        {isEditing && (
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Image URL</label>
-            <Input
-              type="url"
-              placeholder="Enter image URL..."
-              value={editingImage}
-              onChange={(e) => onImageChange(e.target.value)}
-              className="w-full"
-            />
-            {editingImage && (
-              <div className="relative h-32 bg-slate-50 rounded overflow-hidden">
-                <img
-                  src={editingImage}
-                  alt={editingTitle}
-                  className="w-full h-full object-contain"
-                  onError={() => onImageChange("")}
-                />
-              </div>
-            )}
-          </div>
-        )}
 
         <ItemDescription
           description={item.description || ""}
