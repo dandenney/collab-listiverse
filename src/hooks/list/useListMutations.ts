@@ -101,13 +101,14 @@ export function useListMutations(listType: ListType) {
       console.log('=== Update Mutation Debug Log ===');
       console.log('Item to update:', item);
 
-      // First, update the item's basic information
+      // First, update the item's basic information including the image
       const { data: updatedItem, error: updateError } = await supabase
         .from('list_items')
         .update({
           title: item.title,
           description: item.description,
           notes: item.notes,
+          image: item.image, // Ensure image is included in the update
           updated_at: new Date().toISOString()
         })
         .eq('id', item.id)
