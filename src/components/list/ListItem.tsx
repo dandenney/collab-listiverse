@@ -106,25 +106,53 @@ export function ListItem({
       className={`flex flex-col h-full group overflow-hidden relative ${item.completed ? "bg-muted" : ""}`}
       data-item-id={item.id}
     >
-      {!isEditing && item.image && (
-        <div className="bg-slate-50 border-b relative rounded-t h-48 p-4 w-full">
-          <img
-            src={item.image}
-            alt={item.title}
-            className="w-full h-full object-cover rounded"
-          />
-          {item.url && (
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          )}
-        </div>
-      )}
+      <div className="bg-slate-50 border-b relative rounded-t">
+        {(item.image || isEditing) && (
+          <div className="p-4">
+            {isEditing ? (
+              <div className="space-y-2">
+                <Input
+                  type="url"
+                  placeholder="Enter image URL..."
+                  value={editingImage}
+                  onChange={(e) => setEditingImage(e.target.value)}
+                  className="w-full"
+                />
+                {editingImage && (
+                  <div className="relative h-48 bg-slate-50 rounded overflow-hidden">
+                    <img
+                      src={editingImage}
+                      alt={editingTitle}
+                      className="w-full h-full object-contain"
+                      onError={() => setEditingImage("")}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              item.image && (
+                <div className="relative h-48">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover rounded"
+                  />
+                  {item.url && (
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              )
+            )}
+          </div>
+        )}
+      </div>
 
       <ItemContent
         item={item}
