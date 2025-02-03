@@ -5,6 +5,7 @@ import { BaseItem, ListType } from "@/types/list";
 import { useTags } from "@/hooks/useTags";
 import { ItemActions } from "./item/ItemActions";
 import { ItemContent } from "./item/ItemContent";
+import { animate } from "@motionone/dom";
 
 interface ListItemProps {
   item: BaseItem;
@@ -40,6 +41,19 @@ export function ListItem({
     setEditingNotes(item.notes || "");
     setEditingTags(item.tags || []);
     setIsEditing(true);
+    
+    // Animate the card when entering edit mode
+    const card = document.querySelector(`[data-item-id="${item.id}"]`);
+    if (card) {
+      animate(
+        card,
+        { 
+          scale: [1, 1.02],
+          backgroundColor: ['rgb(255, 255, 255)', 'rgb(249, 250, 251)']
+        },
+        { duration: 0.2 }
+      );
+    }
   };
 
   const saveChanges = () => {
@@ -86,10 +100,26 @@ export function ListItem({
     }
 
     setIsEditing(false);
+    
+    // Animate the card when exiting edit mode
+    const card = document.querySelector(`[data-item-id="${item.id}"]`);
+    if (card) {
+      animate(
+        card,
+        { 
+          scale: [1.02, 1],
+          backgroundColor: ['rgb(249, 250, 251)', 'rgb(255, 255, 255)']
+        },
+        { duration: 0.2 }
+      );
+    }
   };
 
   return (
-    <Card className={`flex flex-col h-full group overflow-hidden relative ${item.completed ? "bg-muted" : ""}`}>
+    <Card 
+      className={`flex flex-col h-full group overflow-hidden relative ${item.completed ? "bg-muted" : ""}`}
+      data-item-id={item.id}
+    >
       {item.image && (
         <div className="bg-slate-50 border-b relative rounded-t h-48 p-4 w-full">
           <img
@@ -153,7 +183,21 @@ export function ListItem({
             isEditing={isEditing}
             onEdit={startEditing}
             onSave={saveChanges}
-            onCancel={() => setIsEditing(false)}
+            onCancel={() => {
+              setIsEditing(false);
+              // Animate back to normal state when canceling
+              const card = document.querySelector(`[data-item-id="${item.id}"]`);
+              if (card) {
+                animate(
+                  card,
+                  { 
+                    scale: [1.02, 1],
+                    backgroundColor: ['rgb(249, 250, 251)', 'rgb(255, 255, 255)']
+                  },
+                  { duration: 0.2 }
+                );
+              }
+            }}
             onToggle={onToggle}
             item={item}
             completeButtonText={completeButtonText}
