@@ -6,6 +6,7 @@ import { useTags } from "@/hooks/useTags";
 import { ItemActions } from "./item/ItemActions";
 import { ItemContent } from "./item/ItemContent";
 import { animate } from "@motionone/dom";
+import { Input } from "@/components/ui/input";
 
 interface ListItemProps {
   item: BaseItem;
@@ -30,6 +31,7 @@ export function ListItem({
   const [editingDescription, setEditingDescription] = useState(item.description || "");
   const [editingNotes, setEditingNotes] = useState(item.notes || "");
   const [editingTags, setEditingTags] = useState(item.tags || []);
+  const [editingImage, setEditingImage] = useState(item.image || "");
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { tags: availableTags = [] } = useTags(listType);
@@ -40,9 +42,9 @@ export function ListItem({
     setEditingDescription(item.description || "");
     setEditingNotes(item.notes || "");
     setEditingTags(item.tags || []);
+    setEditingImage(item.image || "");
     setIsEditing(true);
     
-    // Animate the card when entering edit mode
     const card = document.querySelector(`[data-item-id="${item.id}"]`);
     if (card) {
       animate(
@@ -63,29 +65,30 @@ export function ListItem({
       title: editingTitle,
       description: editingDescription,
       notes: editingNotes,
-      tags: editingTags
+      tags: editingTags,
+      image: editingImage
     });
 
     const updates: Partial<BaseItem> = {};
     
     if (editingTitle !== item.title) {
-      console.log('Title changed from:', item.title, 'to:', editingTitle);
       updates.title = editingTitle;
     }
     
     if (editingDescription !== item.description) {
-      console.log('Description changed from:', item.description, 'to:', editingDescription);
       updates.description = editingDescription;
     }
     
     if (editingNotes !== item.notes) {
-      console.log('Notes changed from:', item.notes, 'to:', editingNotes);
       updates.notes = editingNotes;
     }
     
     if (JSON.stringify(editingTags) !== JSON.stringify(item.tags)) {
-      console.log('Tags changed from:', item.tags, 'to:', editingTags);
       updates.tags = editingTags;
+    }
+
+    if (editingImage !== item.image) {
+      updates.image = editingImage || null;
     }
 
     const hasChanges = Object.keys(updates).length > 0;
@@ -95,13 +98,10 @@ export function ListItem({
     if (hasChanges && onUpdate) {
       console.log('Calling onUpdate with:', { id: item.id, updates });
       onUpdate(item.id, updates);
-    } else {
-      console.log('No changes to save or onUpdate not provided');
     }
 
     setIsEditing(false);
     
-    // Animate the card when exiting edit mode
     const card = document.querySelector(`[data-item-id="${item.id}"]`);
     if (card) {
       animate(
@@ -120,22 +120,46 @@ export function ListItem({
       className={`flex flex-col h-full group overflow-hidden relative ${item.completed ? "bg-muted" : ""}`}
       data-item-id={item.id}
     >
-      {item.image && (
+      {(item.image || isEditing) && (
         <div className="bg-slate-50 border-b relative rounded-t h-48 p-4 w-full">
-          <img
-            src={item.image}
-            alt={item.title}
-            className="w-full h-full object-cover rounded"
-          />
-          {item.url && (
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
+          {isEditing ? (
+            <div className="h-full flex flex-col gap-2">
+              <Input
+                type="url"
+                placeholder="Enter image URL..."
+                value={editingImage}
+                onChange={(e) => setEditingImage(e.target.value)}
+                className="w-full"
+              />
+              {editingImage && (
+                <div className="flex-1 relative">
+                  <img
+                    src={editingImage}
+                    alt={editingTitle}
+                    className="w-full h-full object-cover rounded"
+                    onError={() => setEditingImage("")}
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <img
+                src={item.image}
+                alt={item.title}
+                className="w-full h-full object-cover rounded"
+              />
+              {item.url && (
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute top-2 right-2 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+            </>
           )}
         </div>
       )}
@@ -185,7 +209,7 @@ export function ListItem({
             onSave={saveChanges}
             onCancel={() => {
               setIsEditing(false);
-              // Animate back to normal state when canceling
+              setEditingImage(item.image || "");
               const card = document.querySelector(`[data-item-id="${item.id}"]`);
               if (card) {
                 animate(
