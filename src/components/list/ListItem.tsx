@@ -5,7 +5,8 @@ import { BaseItem, ListType } from "@/types/list";
 import { useTags } from "@/hooks/useTags";
 import { ItemActions } from "./item/ItemActions";
 import { ItemContent } from "./item/ItemContent";
-import { animate, motion } from "@motionone/dom";
+import { animate } from "@motionone/dom";
+import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 
