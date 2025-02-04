@@ -38,39 +38,31 @@ const App = () => {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  const AppContent = () => {
-    if (!session) {
-      return (
-        <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route path="*" element={<Navigate to="/auth" replace />} />
-        </Routes>
-      );
-    }
-
-    return (
-      <TooltipProvider>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Navigate to="/grocery" replace />} />
-            <Route path="/grocery" element={<GroceryList />} />
-            <Route path="/shopping" element={<ShoppingList />} />
-            <Route path="/watch" element={<WatchList />} />
-            <Route path="/read" element={<ReadList />} />
-            <Route path="/local" element={<LocalList />} />
-            <Route path="/recipes" element={<RecipeList />} />
-            <Route path="*" element={<Navigate to="/grocery" replace />} />
-          </Routes>
-        </Layout>
-      </TooltipProvider>
-    );
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <TooltipProvider>
+        <BrowserRouter>
+          {!session ? (
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="*" element={<Navigate to="/auth" replace />} />
+            </Routes>
+          ) : (
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Navigate to="/grocery" replace />} />
+                <Route path="/grocery" element={<GroceryList />} />
+                <Route path="/shopping" element={<ShoppingList />} />
+                <Route path="/watch" element={<WatchList />} />
+                <Route path="/read" element={<ReadList />} />
+                <Route path="/local" element={<LocalList />} />
+                <Route path="/recipes" element={<RecipeList />} />
+                <Route path="*" element={<Navigate to="/grocery" replace />} />
+              </Routes>
+            </Layout>
+          )}
+        </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 };
