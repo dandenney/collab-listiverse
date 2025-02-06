@@ -9,7 +9,6 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const sections = [
   { path: "/grocery", title: "Grocery List", icon: ShoppingCart, description: "Manage your grocery shopping items" },
@@ -21,8 +20,6 @@ const sections = [
 ];
 
 export function LandingPage() {
-  const isMobile = useIsMobile();
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-8">Welcome to Your Lists</h1>
@@ -42,9 +39,6 @@ export function LandingPage() {
                 <section.icon className="w-8 h-8 md:w-10 md:h-10 text-primary" />
                 <h2 className="text-sm md:text-lg font-semibold">{section.title}</h2>
               </div>
-              {!isMobile && (
-                <p className="text-muted-foreground mt-3">{section.description}</p>
-              )}
             </Link>
           </motion.div>
         ))}
