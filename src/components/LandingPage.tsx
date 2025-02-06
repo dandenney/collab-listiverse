@@ -38,9 +38,9 @@ export function LandingPage() {
               to={section.path}
               className="block p-4 md:p-6 rounded-lg border border-border hover:border-primary transition-colors bg-card hover:bg-card/80"
             >
-              <div className="flex items-center gap-2 md:gap-3">
-                <section.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                <h2 className="text-lg md:text-xl font-semibold">{section.title}</h2>
+              <div className="flex flex-col items-center text-center gap-2">
+                <section.icon className="w-8 h-8 md:w-10 md:h-10 text-primary" />
+                <h2 className="text-sm md:text-lg font-semibold">{section.title}</h2>
               </div>
               {!isMobile && (
                 <p className="text-muted-foreground mt-3">{section.description}</p>
