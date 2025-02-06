@@ -9,6 +9,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const sections = [
   { path: "/grocery", title: "Grocery List", icon: ShoppingCart, description: "Manage your grocery shopping items" },
@@ -20,10 +21,12 @@ const sections = [
 ];
 
 export function LandingPage() {
+  const isMobile = useIsMobile();
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-8">Welcome to Your Lists</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
         {sections.map((section, index) => (
           <motion.div
             key={section.path}
@@ -33,13 +36,15 @@ export function LandingPage() {
           >
             <Link
               to={section.path}
-              className="block p-6 rounded-lg border border-border hover:border-primary transition-colors bg-card hover:bg-card/80"
+              className="block p-4 md:p-6 rounded-lg border border-border hover:border-primary transition-colors bg-card hover:bg-card/80"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <section.icon className="w-6 h-6 text-primary" />
-                <h2 className="text-xl font-semibold">{section.title}</h2>
+              <div className="flex items-center gap-2 md:gap-3">
+                <section.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                <h2 className="text-lg md:text-xl font-semibold">{section.title}</h2>
               </div>
-              <p className="text-muted-foreground">{section.description}</p>
+              {!isMobile && (
+                <p className="text-muted-foreground mt-3">{section.description}</p>
+              )}
             </Link>
           </motion.div>
         ))}
