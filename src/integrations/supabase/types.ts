@@ -143,7 +143,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      list_type: "grocery" | "shopping" | "watch" | "read" | "local" | "recipe"
+      list_type:
+        | "grocery"
+        | "shopping"
+        | "watch"
+        | "read"
+        | "local"
+        | "recipe"
+        | "costco"
     }
     CompositeTypes: {
       [_ in never]: never
