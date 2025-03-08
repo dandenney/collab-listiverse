@@ -1,3 +1,4 @@
+
 export interface BaseItem {
   id: string;
   url: string;
@@ -34,4 +35,4 @@ export interface Tag {
   color?: string;
 }
 
-export type ListType = 'grocery' | 'shopping' | 'watch' | 'read' | 'local' | 'recipe';
+export type ListType = 'grocery' | 'shopping' | 'watch' | 'read' | 'local' | 'recipe' | 'costco';

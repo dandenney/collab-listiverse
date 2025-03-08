@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { LandingPage } from "./components/LandingPage";
 import { GroceryList } from "./components/GroceryList";
+import { CostcoList } from "./components/CostcoList";
 import { ShoppingList } from "./components/ShoppingList";
 import { WatchList } from "./components/WatchList";
 import { ReadList } from "./components/ReadList";
@@ -54,6 +55,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/grocery" element={<GroceryList />} />
+                <Route path="/costco" element={<CostcoList />} />
                 <Route path="/shopping" element={<ShoppingList />} />
                 <Route path="/watch" element={<WatchList />} />
                 <Route path="/read" element={<ReadList />} />

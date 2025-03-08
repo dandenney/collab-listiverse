@@ -1,3 +1,4 @@
+
 import { 
   SidebarGroup, 
   SidebarGroupContent, 
@@ -11,11 +12,13 @@ import {
   Film, 
   MapPin, 
   ShoppingBag,
-  UtensilsCrossed 
+  UtensilsCrossed,
+  Store
 } from "lucide-react";
 
 const navigationItems = [
   { path: "/grocery", title: "Grocery", icon: ShoppingCart },
+  { path: "/costco", title: "Costco", icon: Store },
   { path: "/shopping", title: "Shopping", icon: ShoppingBag },
   { path: "/watch", title: "Watch", icon: Film },
   { path: "/read", title: "Read", icon: BookOpen },
