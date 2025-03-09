@@ -33,7 +33,6 @@ export function CostcoItem({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1">
           <Checkbox
-            id={`item-${id}`}
             checked={completed}
             onCheckedChange={onToggle}
           />
@@ -47,13 +46,12 @@ export function CostcoItem({
               className="flex-1"
             />
           ) : (
-            <label
-              htmlFor={`item-${id}`}
-              className={`flex-1 cursor-pointer ${completed ? "line-through text-muted-foreground" : ""}`}
+            <span
+              className={`flex-1 ${completed ? "line-through text-muted-foreground" : ""}`}
               onDoubleClick={onDoubleClick}
             >
               {title}
-            </label>
+            </span>
           )}
         </div>
       </div>

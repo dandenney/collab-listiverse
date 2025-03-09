@@ -2,8 +2,7 @@
 import { useState } from "react";
 import { useListItems } from "@/hooks/useListItems";
 import { CostcoListHeader } from "./costco/CostcoListHeader";
-import { toast } from "sonner";
-import { CostcoAddItem } from "./costco/CostcoAddItem";
+import { AddCostcoItem } from "./costco/AddCostcoItem";
 import { CostcoItem } from "./costco/CostcoItem";
 
 interface EditingItem {
@@ -17,7 +16,7 @@ export function CostcoList() {
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
 
   const {
-    query: { data: items = [], refetch, isLoading },
+    query: { data: items = [], refetch },
     addItemMutation,
     toggleItemMutation,
     updateItemMutation,
@@ -87,27 +86,10 @@ export function CostcoList() {
 
   const archiveCompleted = () => {
     const completedItems = items.filter(item => item.completed);
-    if (completedItems.length === 0) {
-      toast.info("No completed items to archive");
-      return;
-    }
+    if (completedItems.length === 0) return;
     
-    console.log(`Archiving ${completedItems.length} completed items...`);
-    
-    archiveCompletedMutation.mutate(undefined, {
-      onSuccess: () => {
-        toast.success(`${completedItems.length} completed items archived`);
-        refetch();
-      },
-      onError: () => {
-        toast.error("Failed to archive items");
-      }
-    });
+    archiveCompletedMutation.mutate();
   };
-
-  if (isLoading) {
-    return <div className="p-4 text-center">Loading Costco list...</div>;
-  }
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -118,7 +100,7 @@ export function CostcoList() {
       />
 
       {!showArchived && (
-        <CostcoAddItem 
+        <AddCostcoItem
           newItem={newItem}
           onNewItemChange={setNewItem}
           onSubmit={handleSubmit}
