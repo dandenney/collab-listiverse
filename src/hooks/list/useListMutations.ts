@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BaseItem, ListType } from "@/types/list";
@@ -78,7 +79,10 @@ export function useListMutations(listType: ListType) {
         .update({ completed })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Toggle error:', error);
+        throw error;
+      }
       
       const { data, error: fetchError } = await supabase
         .from('list_items')
@@ -86,13 +90,24 @@ export function useListMutations(listType: ListType) {
         .eq('id', id)
         .maybeSingle();
         
-      if (fetchError) throw fetchError;
-      if (!data) throw new Error('Item not found');
+      if (fetchError) {
+        console.error('Fetch error after toggle:', fetchError);
+        throw fetchError;
+      }
       
+      if (!data) {
+        console.error('Item not found after toggle');
+        throw new Error('Item not found');
+      }
+      
+      console.log('Toggle successful, updated item:', data);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
+    },
+    onError: (error) => {
+      console.error('Toggle operation failed:', error);
     }
   });
 
@@ -101,26 +116,32 @@ export function useListMutations(listType: ListType) {
       console.log('=== Update Mutation Debug Log ===');
       console.log('Item to update:', item);
 
-      // First, update the item's basic information including the image
-      const { data: updatedItem, error: updateError } = await supabase
+      // First, update the item's basic information
+      const { data, error } = await supabase
         .from('list_items')
         .update({
           title: item.title,
           description: item.description,
           notes: item.notes,
-          image: item.image, // Ensure image is included in the update
+          image: item.image,
           updated_at: new Date().toISOString()
         })
         .eq('id', item.id)
-        .select('*')
-        .single();
+        .select();
 
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
       }
 
-      console.log('Basic item update response:', updatedItem);
+      console.log('Basic item update response:', data);
+
+      if (!data || data.length === 0) {
+        console.error('No data returned from update');
+        throw new Error('Failed to update item - no data returned');
+      }
+
+      const updatedItem = data[0];
 
       // If tags are included in the update, handle them
       if (item.tags !== undefined) {
@@ -185,16 +206,25 @@ export function useListMutations(listType: ListType) {
 
   const archiveCompletedMutation = useMutation({
     mutationFn: async () => {
+      console.log('Archiving completed items for type:', listType);
       const { error } = await supabase
         .from('list_items')
         .update({ archived: true })
         .eq('type', listType)
         .eq('completed', true);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Archive error:', error);
+        throw error;
+      }
+      
+      console.log('Archive operation successful');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
+    },
+    onError: (error) => {
+      console.error('Archive operation failed:', error);
     }
   });
 
