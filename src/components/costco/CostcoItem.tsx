@@ -35,6 +35,7 @@ export function CostcoItem({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1">
           <Checkbox
+            id={`item-${id}`}
             checked={completed}
             onCheckedChange={() => {
               console.log(`Checkbox clicked for item: ${id} Current completed state: ${completed}`);
@@ -60,15 +61,16 @@ export function CostcoItem({
               className="flex-1"
             />
           ) : (
-            <span
-              className={`flex-1 ${completed ? "line-through text-muted-foreground" : ""}`}
+            <label
+              htmlFor={`item-${id}`}
+              className={`flex-1 cursor-pointer ${completed ? "line-through text-muted-foreground" : ""}`}
               onDoubleClick={() => {
                 console.log(`Double click on item: ${id}`);
                 onDoubleClick();
               }}
             >
               {title}
-            </span>
+            </label>
           )}
         </div>
       </div>

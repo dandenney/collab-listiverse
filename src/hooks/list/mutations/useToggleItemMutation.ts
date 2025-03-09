@@ -8,32 +8,19 @@ export function useToggleItemMutation(listType: ListType) {
 
   return useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      console.log(`Toggling item completion:`, { id, completed });
+      console.log(`Toggling item completion to ${completed}:`, { id });
       
-      const { error } = await supabase
+      // Simplify the toggle operation - just update the item
+      const { data, error } = await supabase
         .from('list_items')
         .update({ completed })
-        .eq('id', id);
+        .eq('id', id)
+        .select()
+        .maybeSingle();
 
       if (error) {
         console.error('Toggle error:', error);
         throw error;
-      }
-      
-      const { data, error: fetchError } = await supabase
-        .from('list_items')
-        .select()
-        .eq('id', id)
-        .maybeSingle();
-        
-      if (fetchError) {
-        console.error('Fetch error after toggle:', fetchError);
-        throw fetchError;
-      }
-      
-      if (!data) {
-        console.error('Item not found after toggle');
-        throw new Error('Item not found');
       }
       
       console.log('Toggle successful, updated item:', data);

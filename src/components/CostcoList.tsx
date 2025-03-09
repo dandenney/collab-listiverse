@@ -17,7 +17,7 @@ export function CostcoList() {
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
 
   const {
-    query: { data: items = [], refetch },
+    query: { data: items = [], isLoading, refetch },
     addItemMutation,
     toggleItemMutation,
     updateItemMutation,
@@ -36,17 +36,44 @@ export function CostcoList() {
       completed: false,
       tags: [],
       notes: ""
+    }, {
+      onSuccess: () => {
+        console.log("Item added successfully");
+        setNewItem("");
+      },
+      onError: (error) => {
+        console.error("Error adding item:", error);
+        toast.error("Failed to add item");
+      }
     });
-    
-    setNewItem("");
   };
 
-  const toggleItem = (id: string) => {
+  const toggleItem = async (id: string) => {
     const item = items.find(item => item.id === id);
-    if (item) {
-      console.log(`Checkbox clicked for item: ${id} Current completed state: ${item.completed}`);
-      console.log(`Toggling costco item: ${id} Current completed status: ${item.completed}`);
-      toggleItemMutation.mutate({ id, completed: !item.completed });
+    if (!item) {
+      console.error(`Item with ID ${id} not found when trying to toggle`);
+      return;
+    }
+
+    const newCompletedState = !item.completed;
+    console.log(`Toggling costco item: ${id} from ${item.completed} to ${newCompletedState}`);
+    
+    try {
+      await toggleItemMutation.mutateAsync({ 
+        id, 
+        completed: newCompletedState 
+      }, {
+        onSuccess: () => {
+          console.log(`Successfully toggled item: ${id} to ${newCompletedState}`);
+          refetch();
+        },
+        onError: (error) => {
+          console.error(`Error toggling item: ${id}`, error);
+          toast.error("Failed to update item status");
+        }
+      });
+    } catch (error) {
+      console.error(`Exception when toggling item: ${id}`, error);
     }
   };
 
@@ -111,6 +138,10 @@ export function CostcoList() {
     
     archiveCompletedMutation.mutate();
   };
+
+  if (isLoading) {
+    return <div className="p-4 text-center">Loading Costco list...</div>;
+  }
 
   return (
     <div className="w-full max-w-2xl mx-auto">
