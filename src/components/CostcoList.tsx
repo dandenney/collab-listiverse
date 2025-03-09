@@ -168,7 +168,7 @@ export function CostcoList() {
       <div className="space-y-2">
         {items.map((item) => {
           // Use the pending toggle state if it exists, otherwise use the item's state
-          const effectiveCompletedState = id in pendingToggles 
+          const effectiveCompletedState = item.id in pendingToggles 
             ? pendingToggles[item.id] 
             : item.completed;
             
