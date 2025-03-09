@@ -2,6 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { ItemActions } from "@/components/list/item/ItemActions";
 
 interface CostcoItemProps {
   id: string;
@@ -54,6 +55,16 @@ export function CostcoItem({
             </span>
           )}
         </div>
+        <ItemActions
+          isEditing={isEditing}
+          onEdit={() => onDoubleClick()}
+          onSave={onBlur}
+          onCancel={() => onEditingTitleChange(title)}
+          onToggle={() => onToggle()}
+          item={{ id, title, completed }}
+          completeButtonText="Complete"
+          uncompleteButtonText="Uncomplete"
+        />
       </div>
     </Card>
   );
