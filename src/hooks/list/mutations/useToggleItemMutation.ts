@@ -28,7 +28,23 @@ export function useToggleItemMutation(listType: ListType) {
     },
     onSuccess: (data) => {
       console.log('Toggle mutation succeeded:', data);
-      queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      
+      // We're not immediately invalidating the query here anymore
+      // Instead, we'll let the component handle when to clear its optimistic state
+      
+      // Update the cache optimistically to match our local state
+      queryClient.setQueryData(
+        ['items', listType],
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          
+          // Update the cached item with our new completed state
+          return oldData.map((item: any) => 
+            item.id === data.id ? { ...item, completed: data.completed } : item
+          );
+        }
+      );
+      
       toast.success("Item status updated");
     },
     onError: (error) => {

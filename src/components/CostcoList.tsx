@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useListItems } from "@/hooks/useListItems";
 import { CostcoListHeader } from "./costco/CostcoListHeader";
@@ -23,6 +22,7 @@ export function CostcoList() {
     toggleItemMutation,
     updateItemMutation,
     archiveCompletedMutation,
+    queryClient,
   } = useListItems("costco", showArchived);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,19 +69,25 @@ export function CostcoList() {
         completed: newCompletedState 
       });
       console.log(`Successfully toggled item: ${id} to ${newCompletedState}`);
-    } catch (error) {
-      console.error(`Exception when toggling item: ${id}`, error);
-      // Revert optimistic update on error
-      setPendingToggles(prev => ({ ...prev, [id]: item.completed }));
-    } finally {
-      // Remove from pending state after operation completes (success or failure)
-      setTimeout(() => {
+      
+      // Keep the pendingToggle state until the next refetch to prevent flickering
+      // Only remove from pending state when invalidateQueries completes
+      queryClient.invalidateQueries({ 
+        queryKey: ['items', 'costco'],
+        exact: false
+      }).then(() => {
+        // After refetch completes, we can safely remove the pending state
         setPendingToggles(prev => {
           const newState = { ...prev };
           delete newState[id];
           return newState;
         });
-      }, 500);
+      });
+    } catch (error) {
+      console.error(`Exception when toggling item: ${id}`, error);
+      // Revert optimistic update on error
+      setPendingToggles(prev => ({ ...prev, [id]: item.completed }));
+      toast.error("Failed to update item status");
     }
   };
 
