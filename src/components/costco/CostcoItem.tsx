@@ -28,8 +28,6 @@ export function CostcoItem({
   onKeyDown,
   onDoubleClick
 }: CostcoItemProps) {
-  console.log(`Rendering CostcoItem: ${id}, title: "${title}", completed: ${completed}, isEditing: ${isEditing}`);
-  
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between gap-3">
@@ -37,26 +35,14 @@ export function CostcoItem({
           <Checkbox
             id={`item-${id}`}
             checked={completed}
-            onCheckedChange={() => {
-              console.log(`Checkbox clicked for item: ${id} Current completed state: ${completed}`);
-              onToggle();
-            }}
+            onCheckedChange={onToggle}
           />
           {isEditing ? (
             <Input
               value={editingTitle}
-              onChange={(e) => {
-                console.log(`Editing title for item: ${id}, new value: "${e.target.value}"`);
-                onEditingTitleChange(e.target.value);
-              }}
-              onBlur={() => {
-                console.log(`Input blur event for item: ${id}`);
-                onBlur();
-              }}
-              onKeyDown={(e) => {
-                console.log(`Key pressed for item: ${id}, key: ${e.key}`);
-                onKeyDown(e);
-              }}
+              onChange={(e) => onEditingTitleChange(e.target.value)}
+              onBlur={onBlur}
+              onKeyDown={onKeyDown}
               autoFocus
               className="flex-1"
             />
@@ -64,10 +50,7 @@ export function CostcoItem({
             <label
               htmlFor={`item-${id}`}
               className={`flex-1 cursor-pointer ${completed ? "line-through text-muted-foreground" : ""}`}
-              onDoubleClick={() => {
-                console.log(`Double click on item: ${id}`);
-                onDoubleClick();
-              }}
+              onDoubleClick={onDoubleClick}
             >
               {title}
             </label>

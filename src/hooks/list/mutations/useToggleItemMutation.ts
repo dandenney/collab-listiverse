@@ -34,7 +34,7 @@ export function useToggleItemMutation(listType: ListType) {
     onSuccess: (data) => {
       console.log('Toggle mutation succeeded with data:', data);
       
-      // We're using a forced update to the cache with our response data
+      // Update the cached item with our response data
       queryClient.setQueryData(
         ['items', listType],
         (oldData: any) => {
