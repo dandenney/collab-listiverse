@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BaseItem, ListType } from "@/types/list";
+import { toast } from "sonner";
 
 export function useUpdateItemMutation(listType: ListType) {
   const queryClient = useQueryClient();
@@ -22,23 +23,17 @@ export function useUpdateItemMutation(listType: ListType) {
           updated_at: new Date().toISOString()
         })
         .eq('id', item.id)
-        .select();
+        .select()
+        .single();
 
       if (error) {
         console.error('Update error:', error);
+        toast.error("Failed to update item");
         throw error;
       }
 
-      console.log('Basic item update response:', data);
-
-      const updatedItem = data && data.length > 0 ? data[0] : null;
+      console.log('Item update response:', data);
       
-      if (!updatedItem) {
-        console.log('No data returned from update - this may be expected if no changes were made');
-        // Instead of throwing error, return the original item
-        return item;
-      }
-
       // If tags are included in the update, handle them
       if (item.tags !== undefined) {
         console.log('Updating tags for item:', item.tags);
@@ -90,12 +85,12 @@ export function useUpdateItemMutation(listType: ListType) {
         }
       }
 
-      return updatedItem || item;
+      return data || item;
     },
-    onSuccess: (result, variables) => {
+    onSuccess: (result) => {
       console.log('Update successful:', result);
-      console.log('Original variables:', variables);
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      toast.success("Item updated successfully");
     },
     onError: (error) => {
       console.error('Update failed:', error);

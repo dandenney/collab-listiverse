@@ -40,6 +40,7 @@ export function CostcoList() {
       onSuccess: () => {
         console.log("Item added successfully");
         setNewItem("");
+        toast.success("Item added successfully");
       },
       onError: (error) => {
         console.error("Error adding item:", error);
@@ -62,16 +63,8 @@ export function CostcoList() {
       await toggleItemMutation.mutateAsync({ 
         id, 
         completed: newCompletedState 
-      }, {
-        onSuccess: () => {
-          console.log(`Successfully toggled item: ${id} to ${newCompletedState}`);
-          refetch();
-        },
-        onError: (error) => {
-          console.error(`Error toggling item: ${id}`, error);
-          toast.error("Failed to update item status");
-        }
       });
+      console.log(`Successfully toggled item: ${id} to ${newCompletedState}`);
     } catch (error) {
       console.error(`Exception when toggling item: ${id}`, error);
     }
@@ -94,17 +87,8 @@ export function CostcoList() {
     };
     
     try {
-      await updateItemMutation.mutateAsync(updatedItem, {
-        onSuccess: () => {
-          console.log(`Successfully updated item title: ${id}`);
-          refetch();
-        },
-        onError: (error) => {
-          console.error(`Error updating item title: ${id}`, error);
-          toast.error("Failed to update item");
-        }
-      });
-      
+      await updateItemMutation.mutateAsync(updatedItem);
+      console.log(`Successfully updated item title: ${id}`);
       setEditingItem(null);
     } catch (error) {
       console.error(`Exception when updating item title: ${id}`, error);
@@ -136,7 +120,14 @@ export function CostcoList() {
     const completedItems = items.filter(item => item.completed);
     if (completedItems.length === 0) return;
     
-    archiveCompletedMutation.mutate();
+    archiveCompletedMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Completed items archived");
+      },
+      onError: () => {
+        toast.error("Failed to archive items");
+      }
+    });
   };
 
   if (isLoading) {

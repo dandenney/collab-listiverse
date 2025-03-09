@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ListType } from "@/types/list";
+import { toast } from "sonner";
 
 export function useToggleItemMutation(listType: ListType) {
   const queryClient = useQueryClient();
@@ -10,16 +11,17 @@ export function useToggleItemMutation(listType: ListType) {
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
       console.log(`Toggling item completion to ${completed}:`, { id });
       
-      // Simplify the toggle operation - just update the item
+      // First perform the update
       const { data, error } = await supabase
         .from('list_items')
         .update({ completed })
         .eq('id', id)
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('Toggle error:', error);
+        toast.error("Failed to update item status");
         throw error;
       }
       
