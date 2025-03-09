@@ -12,7 +12,6 @@ export function useUpdateItemMutation(listType: ListType) {
       console.log('Item to update:', item);
 
       // First, update the item's basic information
-      // The key fix: changed .select() to select().maybeSingle() to handle potential missing rows
       const { data, error } = await supabase
         .from('list_items')
         .update({
@@ -32,8 +31,6 @@ export function useUpdateItemMutation(listType: ListType) {
 
       console.log('Basic item update response:', data);
 
-      // Changed: Don't check for empty data array, just return the first item if available
-      // This matches how the GroceryList implementation handles the response
       const updatedItem = data && data.length > 0 ? data[0] : null;
       
       if (!updatedItem) {
