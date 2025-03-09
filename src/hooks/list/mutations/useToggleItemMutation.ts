@@ -8,7 +8,7 @@ export function useToggleItemMutation(listType: ListType) {
 
   return useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      console.log('Toggling item completion:', { id, completed });
+      console.log(`Toggling item completion:`, { id, completed });
       
       const { error } = await supabase
         .from('list_items')
@@ -39,7 +39,8 @@ export function useToggleItemMutation(listType: ListType) {
       console.log('Toggle successful, updated item:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Toggle mutation succeeded:', data);
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
     },
     onError: (error) => {

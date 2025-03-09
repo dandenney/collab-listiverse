@@ -92,7 +92,9 @@ export function useUpdateItemMutation(listType: ListType) {
 
       return updatedItem || item;
     },
-    onSuccess: () => {
+    onSuccess: (result, variables) => {
+      console.log('Update successful:', result);
+      console.log('Original variables:', variables);
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
     },
     onError: (error) => {

@@ -44,6 +44,8 @@ export function CostcoList() {
   const toggleItem = (id: string) => {
     const item = items.find(item => item.id === id);
     if (item) {
+      console.log(`Checkbox clicked for item: ${id} Current completed state: ${item.completed}`);
+      console.log(`Toggling costco item: ${id} Current completed status: ${item.completed}`);
       toggleItemMutation.mutate({ id, completed: !item.completed });
     }
   };
@@ -52,34 +54,52 @@ export function CostcoList() {
     if (!newTitle.trim()) return;
     
     const item = items.find(item => item.id === id);
-    if (!item) return;
+    if (!item) {
+      console.error(`Item with ID ${id} not found when trying to update title`);
+      return;
+    }
 
+    console.log(`Updating item title: ${id} Current: "${item.title}" New: "${newTitle.trim()}"`);
+    
     const updatedItem = {
       ...item,
       title: newTitle.trim()
     };
     
-    await updateItemMutation.mutateAsync(updatedItem, {
-      onSuccess: () => {
-        refetch();
-      }
-    });
-    
-    setEditingItem(null);
+    try {
+      await updateItemMutation.mutateAsync(updatedItem, {
+        onSuccess: () => {
+          console.log(`Successfully updated item title: ${id}`);
+          refetch();
+        },
+        onError: (error) => {
+          console.error(`Error updating item title: ${id}`, error);
+          toast.error("Failed to update item");
+        }
+      });
+      
+      setEditingItem(null);
+    } catch (error) {
+      console.error(`Exception when updating item title: ${id}`, error);
+      toast.error("Failed to update item");
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
     if (e.key === "Enter") {
       e.preventDefault();
+      console.log(`Enter key pressed for item: ${id}`);
       if (editingItem) {
         updateItemTitle(id, editingItem.title);
       }
     } else if (e.key === "Escape") {
+      console.log(`Escape key pressed for item: ${id}, cancelling edit`);
       setEditingItem(null);
     }
   };
 
   const handleBlur = (id: string) => {
+    console.log(`Input blurred for item: ${id}`);
     if (editingItem) {
       updateItemTitle(id, editingItem.title);
     }
