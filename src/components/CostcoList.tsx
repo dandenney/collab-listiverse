@@ -12,7 +12,7 @@ export function CostcoList() {
   const [showArchived, setShowArchived] = useState(false);
 
   const {
-    query: { data: items = [], isLoading },
+    query: { data: items = [], isLoading, refetch },
     addItemMutation,
     toggleItemMutation,
     updateItemMutation,
@@ -39,12 +39,20 @@ export function CostcoList() {
   });
 
   const archiveCompleted = () => {
-    const completedItems = items.filter(item => item.completed);
-    if (completedItems.length === 0) return;
+    // Apply effective completed states to determine which items to archive
+    const completedItems = items.filter(item => getEffectiveCompletedState(item));
+    
+    if (completedItems.length === 0) {
+      toast.info("No completed items to archive");
+      return;
+    }
+    
+    console.log(`Archiving ${completedItems.length} completed items...`);
     
     archiveCompletedMutation.mutate(undefined, {
       onSuccess: () => {
-        toast.success("Completed items archived");
+        toast.success(`${completedItems.length} completed items archived`);
+        refetch();
       },
       onError: () => {
         toast.error("Failed to archive items");

@@ -30,6 +30,12 @@ export function CostcoItemList({
       {items.map((item) => {
         const effectiveCompletedState = getEffectiveCompletedState(item);
         
+        // Apply the effective completed state to the item in the UI
+        const displayedItem = {
+          ...item,
+          completed: effectiveCompletedState
+        };
+        
         console.log(`Rendering item ${item.id}: DB completed=${item.completed}, effective=${effectiveCompletedState}`);
           
         return (
@@ -44,7 +50,7 @@ export function CostcoItemList({
             onEditingTitleChange={(value) => onEditingTitleChange(value)}
             onBlur={() => onBlur(item.id)}
             onKeyDown={(e) => onKeyDown(e, item.id)}
-            onDoubleClick={() => onDoubleClick(item)}
+            onDoubleClick={() => onDoubleClick(displayedItem)}
           />
         );
       })}

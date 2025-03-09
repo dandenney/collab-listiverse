@@ -32,16 +32,15 @@ export function useCostcoItemToggler(
       
       console.log(`Successfully toggled item: ${id} to ${newCompletedState}`, result);
       
-      // Prevent any subsequent refetches from overriding our optimistic update
-      // by applying a cache update that keeps our item's completed state
-      const keepItemCompletedState = () => {
+      // Apply a persistent cache update that keeps our item's completed state
+      const updateItemCompletedState = () => {
         console.log("Applying persistent cache update for item", id);
         queryClient.setQueryData(
           ['items', 'costco', false],
           (oldData: any) => {
             if (!oldData) return oldData;
             
-            // Ensure our item keeps its completed state
+            // Create a new array with our updated item
             const updatedData = oldData.map((item: any) => 
               item.id === id ? { ...item, completed: newCompletedState } : item
             );
@@ -52,28 +51,41 @@ export function useCostcoItemToggler(
         );
       };
       
-      // Apply our cache update immediately
-      keepItemCompletedState();
+      // Also update the archived items view if needed
+      queryClient.setQueryData(
+        ['items', 'costco', true],
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          return oldData;
+        }
+      );
       
-      // We also need to keep the pendingToggles state to ensure UI consistency
-      // Only clear it after the user navigates away or after a delay
+      // Apply our cache update immediately
+      updateItemCompletedState();
+      
+      // Keep the pendingToggles state for UI stability but remove it after a delay
       setTimeout(() => {
         setPendingToggles(prev => {
           const newState = { ...prev };
           delete newState[id];
           return newState;
         });
-      }, 2000); // Keep pending state for 2 seconds to ensure UI stability
+      }, 5000); // Keep pending state for 5 seconds for UI stability
       
     } catch (error) {
       console.error(`Exception when toggling item: ${id}`, error);
       // Revert optimistic update on error
-      setPendingToggles(prev => ({ ...prev, [item.id]: item.completed }));
+      setPendingToggles(prev => {
+        const newState = { ...prev };
+        delete newState[id];
+        return newState;
+      });
       toast.error("Failed to update item status");
     }
   };
 
   const getEffectiveCompletedState = (item: BaseItem) => {
+    // If the item is in pendingToggles, use that state, otherwise use the item's completed state
     return item.id in pendingToggles 
       ? pendingToggles[item.id] 
       : item.completed;

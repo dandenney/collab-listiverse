@@ -11,7 +11,7 @@ export function useToggleItemMutation(listType: ListType) {
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
       console.log(`Toggling item completion to ${completed}:`, { id });
       
-      // Update the item without expecting it to return data (since it might be created by another user)
+      // Update the item without expecting it to return data
       const { error, data } = await supabase
         .from('list_items')
         .update({ completed })
@@ -26,16 +26,14 @@ export function useToggleItemMutation(listType: ListType) {
         throw error;
       }
       
-      // Important: We're going to trust our local completed state
-      // rather than what the database returned, which might be nothing
+      // Return our local state to ensure consistent updates
       console.log('Toggle successful for item:', id);
-      return { id, completed }; // Return our local state
+      return { id, completed };
     },
     onSuccess: (data) => {
       console.log('Toggle mutation succeeded with local state:', data);
       
       // We're using a forced update to the cache with our local state
-      // This is because we cannot trust the database to reflect our changes immediately
       queryClient.setQueryData(
         ['items', listType],
         (oldData: any) => {
@@ -54,10 +52,13 @@ export function useToggleItemMutation(listType: ListType) {
         }
       );
       
+      // Disable automatic invalidation to prevent overriding our optimistic updates
+      // Instead, we'll apply our update manually
       toast.success("Item status updated");
     },
     onError: (error) => {
       console.error('Toggle operation failed:', error);
+      queryClient.invalidateQueries({ queryKey: ['items', listType] });
     }
   });
 }
