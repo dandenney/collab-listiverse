@@ -49,14 +49,17 @@ export function CostcoList() {
     
     console.log(`Archiving ${completedItems.length} completed items...`);
     
-    archiveCompletedMutation.mutate(undefined, {
-      onSuccess: () => {
-        toast.success(`${completedItems.length} completed items archived`);
-        refetch();
-      },
-      onError: () => {
-        toast.error("Failed to archive items");
-      }
+    // Force a refresh before archiving to ensure we have the latest data
+    refetch().then(() => {
+      archiveCompletedMutation.mutate(undefined, {
+        onSuccess: () => {
+          toast.success(`${completedItems.length} completed items archived`);
+          refetch();
+        },
+        onError: () => {
+          toast.error("Failed to archive items");
+        }
+      });
     });
   };
 

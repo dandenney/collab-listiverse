@@ -11,7 +11,7 @@ export function useToggleItemMutation(listType: ListType) {
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
       console.log(`Toggling item completion to ${completed}:`, { id });
       
-      // Update the item without expecting it to return data
+      // Update the item with the new completed state
       const { error, data } = await supabase
         .from('list_items')
         .update({ completed })
@@ -26,14 +26,15 @@ export function useToggleItemMutation(listType: ListType) {
         throw error;
       }
       
-      // Return our local state to ensure consistent updates
-      console.log('Toggle successful for item:', id);
-      return { id, completed };
+      // Check if we got data back and use it, otherwise fall back to our local state
+      const updatedItem = data && data.length > 0 ? data[0] : { id, completed };
+      console.log('Toggle successful, using data:', updatedItem);
+      return updatedItem;
     },
     onSuccess: (data) => {
-      console.log('Toggle mutation succeeded with local state:', data);
+      console.log('Toggle mutation succeeded with data:', data);
       
-      // We're using a forced update to the cache with our local state
+      // We're using a forced update to the cache with our response data
       queryClient.setQueryData(
         ['items', listType],
         (oldData: any) => {
@@ -42,7 +43,7 @@ export function useToggleItemMutation(listType: ListType) {
           console.log('Updating cache with data:', data);
           console.log('Old cache data:', oldData);
           
-          // Update the cached item with our local state
+          // Update the cached item with our response data
           const newData = oldData.map((item: any) => 
             item.id === data.id ? { ...item, completed: data.completed } : item
           );
@@ -52,8 +53,6 @@ export function useToggleItemMutation(listType: ListType) {
         }
       );
       
-      // Disable automatic invalidation to prevent overriding our optimistic updates
-      // Instead, we'll apply our update manually
       toast.success("Item status updated");
     },
     onError: (error) => {

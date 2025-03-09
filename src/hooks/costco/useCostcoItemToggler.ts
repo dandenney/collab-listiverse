@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { BaseItem } from "@/types/list";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,45 +33,17 @@ export function useCostcoItemToggler(
       
       console.log(`Successfully toggled item: ${id} to ${newCompletedState}`, result);
       
-      // Apply a persistent cache update that keeps our item's completed state
-      const updateItemCompletedState = () => {
-        console.log("Applying persistent cache update for item", id);
-        queryClient.setQueryData(
-          ['items', 'costco', false],
-          (oldData: any) => {
-            if (!oldData) return oldData;
-            
-            // Create a new array with our updated item
-            const updatedData = oldData.map((item: any) => 
-              item.id === id ? { ...item, completed: newCompletedState } : item
-            );
-            
-            console.log("Updated cache data:", updatedData);
-            return updatedData;
-          }
-        );
-      };
+      // Apply a persistent cache update to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['items', 'costco'] });
       
-      // Also update the archived items view if needed
-      queryClient.setQueryData(
-        ['items', 'costco', true],
-        (oldData: any) => {
-          if (!oldData) return oldData;
-          return oldData;
-        }
-      );
-      
-      // Apply our cache update immediately
-      updateItemCompletedState();
-      
-      // Keep the pendingToggles state for UI stability but remove it after a delay
+      // Remove the pending toggle after a short delay to ensure UI stability
       setTimeout(() => {
         setPendingToggles(prev => {
           const newState = { ...prev };
           delete newState[id];
           return newState;
         });
-      }, 5000); // Keep pending state for 5 seconds for UI stability
+      }, 1000);
       
     } catch (error) {
       console.error(`Exception when toggling item: ${id}`, error);
