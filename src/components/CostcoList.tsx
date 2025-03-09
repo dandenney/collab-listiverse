@@ -60,29 +60,51 @@ export function CostcoList() {
     const newCompletedState = !item.completed;
     console.log(`Toggling costco item: ${id} from ${item.completed} to ${newCompletedState}`);
     
-    // Optimistically update UI
+    // Optimistically update UI immediately
     setPendingToggles(prev => ({ ...prev, [id]: newCompletedState }));
     
     try {
-      await toggleItemMutation.mutateAsync({ 
+      // Execute the mutation and await its completion
+      const result = await toggleItemMutation.mutateAsync({ 
         id, 
         completed: newCompletedState 
       });
-      console.log(`Successfully toggled item: ${id} to ${newCompletedState}`);
       
-      // Keep the pendingToggle state until the next refetch to prevent flickering
-      // Only remove from pending state when invalidateQueries completes
-      queryClient.invalidateQueries({ 
-        queryKey: ['items', 'costco'],
-        exact: false
-      }).then(() => {
-        // After refetch completes, we can safely remove the pending state
+      console.log(`Successfully toggled item: ${id} to ${newCompletedState}`, result);
+      
+      // Prevent any subsequent refetches from overriding our optimistic update
+      // by applying a cache update that keeps our item's completed state
+      const keepItemCompletedState = () => {
+        console.log("Applying persistent cache update for item", id);
+        queryClient.setQueryData(
+          ['items', 'costco', showArchived],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            
+            // Ensure our item keeps its completed state
+            const updatedData = oldData.map((item: any) => 
+              item.id === id ? { ...item, completed: newCompletedState } : item
+            );
+            
+            console.log("Updated cache data:", updatedData);
+            return updatedData;
+          }
+        );
+      };
+      
+      // Apply our cache update immediately
+      keepItemCompletedState();
+      
+      // We also need to keep the pendingToggles state to ensure UI consistency
+      // Only clear it after the user navigates away or after a delay
+      setTimeout(() => {
         setPendingToggles(prev => {
           const newState = { ...prev };
           delete newState[id];
           return newState;
         });
-      });
+      }, 2000); // Keep pending state for 2 seconds to ensure UI stability
+      
     } catch (error) {
       console.error(`Exception when toggling item: ${id}`, error);
       // Revert optimistic update on error
@@ -177,6 +199,8 @@ export function CostcoList() {
           const effectiveCompletedState = item.id in pendingToggles 
             ? pendingToggles[item.id] 
             : item.completed;
+            
+          console.log(`Rendering item ${item.id}: DB completed=${item.completed}, effective=${effectiveCompletedState}`);
             
           return (
             <CostcoItem

@@ -34,7 +34,16 @@ export function useListQuery(listType: ListType, showArchived: boolean) {
       }
       
       console.log(`Fetched ${items.length} ${listType} items`);
+      
+      // Add extra logging to inspect items data
+      items.forEach(item => {
+        console.log(`Item ${item.id}: completed=${item.completed}, user_id=${item.user_id}`);
+      });
+      
       return transformAndSortItems(items, listType);
-    }
+    },
+    // Disable automatic refetching to prevent our optimistic updates from being overridden
+    refetchOnWindowFocus: false,
+    staleTime: 10000 // Increase stale time to reduce unnecessary refetches
   });
 }
