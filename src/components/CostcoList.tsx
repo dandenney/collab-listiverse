@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useListItems } from "@/hooks/useListItems";
 import { CostcoListHeader } from "./costco/CostcoListHeader";
 import { toast } from "sonner";
-import { CostcoItemList } from "./costco/CostcoItemList";
 import { CostcoAddItem } from "./costco/CostcoAddItem";
+import { CostcoItemList } from "./costco/CostcoItemList";
 
 interface EditingItem {
   id: string;
@@ -103,23 +103,21 @@ export function CostcoList() {
         <CostcoAddItem addItemMutation={addItemMutation} />
       )}
 
-      <div className="space-y-2">
-        {items.map((item) => (
-          <CostcoItem
-            key={item.id}
-            id={item.id}
-            title={item.title}
-            completed={item.completed}
-            isEditing={editingItem?.id === item.id}
-            editingTitle={editingItem?.title || item.title}
-            onToggle={() => toggleItem(item.id)}
-            onEditingTitleChange={(value) => setEditingItem({ id: item.id, title: value })}
-            onBlur={() => handleBlur(item.id)}
-            onKeyDown={(e) => handleKeyDown(e, item.id)}
-            onDoubleClick={() => !showArchived && setEditingItem({ id: item.id, title: item.title })}
-          />
-        ))}
-      </div>
+      <CostcoItemList
+        items={items}
+        editingItem={editingItem}
+        onToggle={toggleItem}
+        onEditingTitleChange={(value) => setEditingItem({ 
+          ...editingItem as EditingItem, 
+          title: value 
+        })}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        onDoubleClick={(id) => !showArchived && setEditingItem({ 
+          id, 
+          title: items.find(item => item.id === id)?.title || "" 
+        })}
+      />
     </div>
   );
 }
