@@ -1,45 +1,30 @@
 
-import { AddCostcoItem } from "./AddCostcoItem";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-interface CostcoAddItemProps {
-  addItemMutation: any;
+interface AddCostcoItemProps {
+  newItem: string;
+  onNewItemChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
 }
 
-export function CostcoAddItem({ addItemMutation }: CostcoAddItemProps) {
-  const [newItem, setNewItem] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newItem.trim()) return;
-
-    addItemMutation.mutate({
-      id: crypto.randomUUID(),
-      url: "",
-      title: newItem.trim(),
-      description: "",
-      completed: false,
-      tags: [],
-      notes: ""
-    }, {
-      onSuccess: () => {
-        console.log("Item added successfully");
-        setNewItem("");
-        toast.success("Item added successfully");
-      },
-      onError: (error: any) => {
-        console.error("Error adding item:", error);
-        toast.error("Failed to add item");
-      }
-    });
-  };
-
+export function CostcoAddItem({
+  newItem,
+  onNewItemChange,
+  onSubmit
+}: AddCostcoItemProps) {
   return (
-    <AddCostcoItem
-      newItem={newItem}
-      onNewItemChange={setNewItem}
-      onSubmit={handleSubmit}
-    />
+    <form onSubmit={onSubmit} className="flex gap-2 mb-6">
+      <Input
+        value={newItem}
+        onChange={(e) => onNewItemChange(e.target.value)}
+        placeholder="Add an item..."
+        className="flex-1"
+      />
+      <Button type="submit" size="icon" variant="ghost">
+        <Plus className="h-4 w-4" />
+      </Button>
+    </form>
   );
 }

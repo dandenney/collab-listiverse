@@ -4,7 +4,7 @@ import { useListItems } from "@/hooks/useListItems";
 import { CostcoListHeader } from "./costco/CostcoListHeader";
 import { toast } from "sonner";
 import { CostcoAddItem } from "./costco/CostcoAddItem";
-import { CostcoItemList } from "./costco/CostcoItemList";
+import { CostcoItem } from "./costco/CostcoItem";
 
 interface EditingItem {
   id: string;
@@ -12,6 +12,7 @@ interface EditingItem {
 }
 
 export function CostcoList() {
+  const [newItem, setNewItem] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
 
@@ -22,6 +23,23 @@ export function CostcoList() {
     updateItemMutation,
     archiveCompletedMutation,
   } = useListItems("costco", showArchived);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newItem.trim()) return;
+
+    addItemMutation.mutate({
+      id: crypto.randomUUID(),
+      url: "",
+      title: newItem.trim(),
+      description: "",
+      completed: false,
+      tags: [],
+      notes: ""
+    });
+    
+    setNewItem("");
+  };
 
   const toggleItem = (id: string) => {
     const item = items.find(item => item.id === id);
@@ -100,24 +118,30 @@ export function CostcoList() {
       />
 
       {!showArchived && (
-        <CostcoAddItem addItemMutation={addItemMutation} />
+        <CostcoAddItem 
+          newItem={newItem}
+          onNewItemChange={setNewItem}
+          onSubmit={handleSubmit}
+        />
       )}
 
-      <CostcoItemList
-        items={items}
-        editingItem={editingItem}
-        onToggle={toggleItem}
-        onEditingTitleChange={(value) => setEditingItem({ 
-          ...editingItem as EditingItem, 
-          title: value 
-        })}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        onDoubleClick={(id) => !showArchived && setEditingItem({ 
-          id, 
-          title: items.find(item => item.id === id)?.title || "" 
-        })}
-      />
+      <div className="space-y-2">
+        {items.map((item) => (
+          <CostcoItem
+            key={item.id}
+            id={item.id}
+            title={item.title}
+            completed={item.completed}
+            isEditing={editingItem?.id === item.id}
+            editingTitle={editingItem?.title || item.title}
+            onToggle={() => toggleItem(item.id)}
+            onEditingTitleChange={(value) => setEditingItem({ id: item.id, title: value })}
+            onBlur={() => handleBlur(item.id)}
+            onKeyDown={(e) => handleKeyDown(e, item.id)}
+            onDoubleClick={() => !showArchived && setEditingItem({ id: item.id, title: item.title })}
+          />
+        ))}
+      </div>
     </div>
   );
 }
