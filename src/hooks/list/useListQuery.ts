@@ -10,7 +10,7 @@ export function useListQuery(listType: ListType, showArchived: boolean) {
     queryFn: async () => {
       console.log(`Fetching ${listType} items with archived=${showArchived}`);
       
-      // Remove user_id filter to ensure we see all items regardless of creator
+      // Query all items of the given type and archived status - no user_id filter
       const { data: items, error: itemsError } = await supabase
         .from('list_items')
         .select(`

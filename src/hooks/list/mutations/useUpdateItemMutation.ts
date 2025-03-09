@@ -12,8 +12,8 @@ export function useUpdateItemMutation(listType: ListType) {
       console.log('=== Update Mutation Debug Log ===');
       console.log('Item to update:', item);
 
-      // First, update the item's basic information
-      const { data, error } = await supabase
+      // Update without expecting data back
+      const { error } = await supabase
         .from('list_items')
         .update({
           title: item.title,
@@ -22,9 +22,7 @@ export function useUpdateItemMutation(listType: ListType) {
           image: item.image,
           updated_at: new Date().toISOString()
         })
-        .eq('id', item.id)
-        .select()
-        .single();
+        .eq('id', item.id);
 
       if (error) {
         console.error('Update error:', error);
@@ -32,7 +30,7 @@ export function useUpdateItemMutation(listType: ListType) {
         throw error;
       }
 
-      console.log('Item update response:', data);
+      console.log('Item update successful for id:', item.id);
       
       // If tags are included in the update, handle them
       if (item.tags !== undefined) {
@@ -85,7 +83,7 @@ export function useUpdateItemMutation(listType: ListType) {
         }
       }
 
-      return data || item;
+      return item; // Return the item we were updating
     },
     onSuccess: (result) => {
       console.log('Update successful:', result);

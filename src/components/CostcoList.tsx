@@ -15,6 +15,7 @@ export function CostcoList() {
   const [newItem, setNewItem] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
+  const [pendingToggles, setPendingToggles] = useState<Record<string, boolean>>({});
 
   const {
     query: { data: items = [], isLoading, refetch },
@@ -59,6 +60,9 @@ export function CostcoList() {
     const newCompletedState = !item.completed;
     console.log(`Toggling costco item: ${id} from ${item.completed} to ${newCompletedState}`);
     
+    // Optimistically update UI
+    setPendingToggles(prev => ({ ...prev, [id]: newCompletedState }));
+    
     try {
       await toggleItemMutation.mutateAsync({ 
         id, 
@@ -67,6 +71,17 @@ export function CostcoList() {
       console.log(`Successfully toggled item: ${id} to ${newCompletedState}`);
     } catch (error) {
       console.error(`Exception when toggling item: ${id}`, error);
+      // Revert optimistic update on error
+      setPendingToggles(prev => ({ ...prev, [id]: item.completed }));
+    } finally {
+      // Remove from pending state after operation completes (success or failure)
+      setTimeout(() => {
+        setPendingToggles(prev => {
+          const newState = { ...prev };
+          delete newState[id];
+          return newState;
+        });
+      }, 500);
     }
   };
 
@@ -151,21 +166,28 @@ export function CostcoList() {
       )}
 
       <div className="space-y-2">
-        {items.map((item) => (
-          <CostcoItem
-            key={item.id}
-            id={item.id}
-            title={item.title}
-            completed={item.completed}
-            isEditing={editingItem?.id === item.id}
-            editingTitle={editingItem?.title || item.title}
-            onToggle={() => toggleItem(item.id)}
-            onEditingTitleChange={(value) => setEditingItem({ id: item.id, title: value })}
-            onBlur={() => handleBlur(item.id)}
-            onKeyDown={(e) => handleKeyDown(e, item.id)}
-            onDoubleClick={() => !showArchived && setEditingItem({ id: item.id, title: item.title })}
-          />
-        ))}
+        {items.map((item) => {
+          // Use the pending toggle state if it exists, otherwise use the item's state
+          const effectiveCompletedState = id in pendingToggles 
+            ? pendingToggles[item.id] 
+            : item.completed;
+            
+          return (
+            <CostcoItem
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              completed={effectiveCompletedState}
+              isEditing={editingItem?.id === item.id}
+              editingTitle={editingItem?.title || item.title}
+              onToggle={() => toggleItem(item.id)}
+              onEditingTitleChange={(value) => setEditingItem({ id: item.id, title: value })}
+              onBlur={() => handleBlur(item.id)}
+              onKeyDown={(e) => handleKeyDown(e, item.id)}
+              onDoubleClick={() => !showArchived && setEditingItem({ id: item.id, title: item.title })}
+            />
+          );
+        })}
       </div>
     </div>
   );

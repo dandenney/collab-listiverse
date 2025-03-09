@@ -11,13 +11,11 @@ export function useToggleItemMutation(listType: ListType) {
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
       console.log(`Toggling item completion to ${completed}:`, { id });
       
-      // First perform the update
-      const { data, error } = await supabase
+      // Update the item without expecting it to return data (since it might be created by another user)
+      const { error } = await supabase
         .from('list_items')
         .update({ completed })
-        .eq('id', id)
-        .select()
-        .single();
+        .eq('id', id);
 
       if (error) {
         console.error('Toggle error:', error);
@@ -25,12 +23,13 @@ export function useToggleItemMutation(listType: ListType) {
         throw error;
       }
       
-      console.log('Toggle successful, updated item:', data);
-      return data;
+      console.log('Toggle successful for item:', id);
+      return { id, completed }; // Return the data we know about the item
     },
     onSuccess: (data) => {
       console.log('Toggle mutation succeeded:', data);
       queryClient.invalidateQueries({ queryKey: ['items', listType] });
+      toast.success("Item status updated");
     },
     onError: (error) => {
       console.error('Toggle operation failed:', error);
