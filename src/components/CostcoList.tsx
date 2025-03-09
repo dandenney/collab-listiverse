@@ -1,163 +1,42 @@
+
 import { useState } from "react";
 import { useListItems } from "@/hooks/useListItems";
 import { CostcoListHeader } from "./costco/CostcoListHeader";
-import { AddCostcoItem } from "./costco/AddCostcoItem";
-import { CostcoItem } from "./costco/CostcoItem";
 import { toast } from "sonner";
-
-interface EditingItem {
-  id: string;
-  title: string;
-}
+import { CostcoItemList } from "./costco/CostcoItemList";
+import { useCostcoItemToggler } from "@/hooks/costco/useCostcoItemToggler";
+import { useCostcoItemEditor } from "./costco/CostcoItemEditor";
+import { CostcoAddItem } from "./costco/CostcoAddItem";
 
 export function CostcoList() {
-  const [newItem, setNewItem] = useState("");
   const [showArchived, setShowArchived] = useState(false);
-  const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
-  const [pendingToggles, setPendingToggles] = useState<Record<string, boolean>>({});
 
   const {
-    query: { data: items = [], isLoading, refetch },
+    query: { data: items = [], isLoading },
     addItemMutation,
     toggleItemMutation,
     updateItemMutation,
     archiveCompletedMutation,
-    queryClient,
   } = useListItems("costco", showArchived);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newItem.trim()) return;
+  // Item toggling logic
+  const { 
+    toggleItem,
+    getEffectiveCompletedState
+  } = useCostcoItemToggler(items, toggleItemMutation);
 
-    addItemMutation.mutate({
-      id: crypto.randomUUID(),
-      url: "",
-      title: newItem.trim(),
-      description: "",
-      completed: false,
-      tags: [],
-      notes: ""
-    }, {
-      onSuccess: () => {
-        console.log("Item added successfully");
-        setNewItem("");
-        toast.success("Item added successfully");
-      },
-      onError: (error) => {
-        console.error("Error adding item:", error);
-        toast.error("Failed to add item");
-      }
-    });
-  };
-
-  const toggleItem = async (id: string) => {
-    const item = items.find(item => item.id === id);
-    if (!item) {
-      console.error(`Item with ID ${id} not found when trying to toggle`);
-      return;
-    }
-
-    const newCompletedState = !item.completed;
-    console.log(`Toggling costco item: ${id} from ${item.completed} to ${newCompletedState}`);
-    
-    // Optimistically update UI immediately
-    setPendingToggles(prev => ({ ...prev, [id]: newCompletedState }));
-    
-    try {
-      // Execute the mutation and await its completion
-      const result = await toggleItemMutation.mutateAsync({ 
-        id, 
-        completed: newCompletedState 
-      });
-      
-      console.log(`Successfully toggled item: ${id} to ${newCompletedState}`, result);
-      
-      // Prevent any subsequent refetches from overriding our optimistic update
-      // by applying a cache update that keeps our item's completed state
-      const keepItemCompletedState = () => {
-        console.log("Applying persistent cache update for item", id);
-        queryClient.setQueryData(
-          ['items', 'costco', showArchived],
-          (oldData: any) => {
-            if (!oldData) return oldData;
-            
-            // Ensure our item keeps its completed state
-            const updatedData = oldData.map((item: any) => 
-              item.id === id ? { ...item, completed: newCompletedState } : item
-            );
-            
-            console.log("Updated cache data:", updatedData);
-            return updatedData;
-          }
-        );
-      };
-      
-      // Apply our cache update immediately
-      keepItemCompletedState();
-      
-      // We also need to keep the pendingToggles state to ensure UI consistency
-      // Only clear it after the user navigates away or after a delay
-      setTimeout(() => {
-        setPendingToggles(prev => {
-          const newState = { ...prev };
-          delete newState[id];
-          return newState;
-        });
-      }, 2000); // Keep pending state for 2 seconds to ensure UI stability
-      
-    } catch (error) {
-      console.error(`Exception when toggling item: ${id}`, error);
-      // Revert optimistic update on error
-      setPendingToggles(prev => ({ ...prev, [id]: item.completed }));
-      toast.error("Failed to update item status");
-    }
-  };
-
-  const updateItemTitle = async (id: string, newTitle: string) => {
-    if (!newTitle.trim()) return;
-    
-    const item = items.find(item => item.id === id);
-    if (!item) {
-      console.error(`Item with ID ${id} not found when trying to update title`);
-      return;
-    }
-
-    console.log(`Updating item title: ${id} Current: "${item.title}" New: "${newTitle.trim()}"`);
-    
-    const updatedItem = {
-      ...item,
-      title: newTitle.trim()
-    };
-    
-    try {
-      await updateItemMutation.mutateAsync(updatedItem);
-      console.log(`Successfully updated item title: ${id}`);
-      setEditingItem(null);
-    } catch (error) {
-      console.error(`Exception when updating item title: ${id}`, error);
-      toast.error("Failed to update item");
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      console.log(`Enter key pressed for item: ${id}`);
-      if (editingItem) {
-        updateItemTitle(id, editingItem.title);
-      }
-    } else if (e.key === "Escape") {
-      console.log(`Escape key pressed for item: ${id}, cancelling edit`);
-      setEditingItem(null);
-    }
-  };
-
-  const handleBlur = (id: string) => {
-    console.log(`Input blurred for item: ${id}`);
-    if (editingItem) {
-      updateItemTitle(id, editingItem.title);
-    }
-  };
+  // Item editing logic
+  const {
+    editingItem,
+    setEditingItem,
+    handleKeyDown,
+    handleBlur,
+    startEditing
+  } = useCostcoItemEditor({
+    items,
+    updateItemMutation,
+    showArchived
+  });
 
   const archiveCompleted = () => {
     const completedItems = items.filter(item => item.completed);
@@ -186,39 +65,23 @@ export function CostcoList() {
       />
 
       {!showArchived && (
-        <AddCostcoItem
-          newItem={newItem}
-          onNewItemChange={setNewItem}
-          onSubmit={handleSubmit}
-        />
+        <CostcoAddItem addItemMutation={addItemMutation} />
       )}
 
-      <div className="space-y-2">
-        {items.map((item) => {
-          // Use the pending toggle state if it exists, otherwise use the item's state
-          const effectiveCompletedState = item.id in pendingToggles 
-            ? pendingToggles[item.id] 
-            : item.completed;
-            
-          console.log(`Rendering item ${item.id}: DB completed=${item.completed}, effective=${effectiveCompletedState}`);
-            
-          return (
-            <CostcoItem
-              key={item.id}
-              id={item.id}
-              title={item.title}
-              completed={effectiveCompletedState}
-              isEditing={editingItem?.id === item.id}
-              editingTitle={editingItem?.title || item.title}
-              onToggle={() => toggleItem(item.id)}
-              onEditingTitleChange={(value) => setEditingItem({ id: item.id, title: value })}
-              onBlur={() => handleBlur(item.id)}
-              onKeyDown={(e) => handleKeyDown(e, item.id)}
-              onDoubleClick={() => !showArchived && setEditingItem({ id: item.id, title: item.title })}
-            />
-          );
+      <CostcoItemList
+        items={items}
+        editingItemId={editingItem?.id || null}
+        editingTitle={editingItem?.title || ""}
+        onToggleItem={toggleItem}
+        onEditingTitleChange={(value) => setEditingItem({ 
+          id: editingItem?.id || "", 
+          title: value 
         })}
-      </div>
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        onDoubleClick={startEditing}
+        getEffectiveCompletedState={getEffectiveCompletedState}
+      />
     </div>
   );
 }
