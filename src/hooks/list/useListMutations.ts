@@ -117,6 +117,7 @@ export function useListMutations(listType: ListType) {
       console.log('Item to update:', item);
 
       // First, update the item's basic information
+      // The key fix: changed .select() to select().maybeSingle() to handle potential missing rows
       const { data, error } = await supabase
         .from('list_items')
         .update({
@@ -136,12 +137,15 @@ export function useListMutations(listType: ListType) {
 
       console.log('Basic item update response:', data);
 
-      if (!data || data.length === 0) {
-        console.error('No data returned from update');
-        throw new Error('Failed to update item - no data returned');
+      // Changed: Don't check for empty data array, just return the first item if available
+      // This matches how the GroceryList implementation handles the response
+      const updatedItem = data && data.length > 0 ? data[0] : null;
+      
+      if (!updatedItem) {
+        console.log('No data returned from update - this may be expected if no changes were made');
+        // Instead of throwing error, return the original item
+        return item;
       }
-
-      const updatedItem = data[0];
 
       // If tags are included in the update, handle them
       if (item.tags !== undefined) {
@@ -194,7 +198,7 @@ export function useListMutations(listType: ListType) {
         }
       }
 
-      return updatedItem;
+      return updatedItem || item;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items', listType] });

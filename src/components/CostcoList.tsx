@@ -52,7 +52,7 @@ export function CostcoList() {
     }
   };
 
-  const updateItemTitle = async (id: string, newTitle: string) => {
+  const updateItemTitle = (id: string, newTitle: string) => {
     if (!newTitle.trim()) return;
     
     const item = items.find(item => item.id === id);
@@ -68,17 +68,19 @@ export function CostcoList() {
       title: newTitle.trim()
     };
     
-    try {
-      await updateItemMutation.mutateAsync(updatedItem);
-      console.log("Update successful");
-      toast.success("Item updated");
-      refetch();
-    } catch (error) {
-      console.error("Update error:", error);
-      toast.error("Failed to update item");
-    }
-    
-    setEditingItem(null);
+    // Changed: Removed try/catch and async/await to match GroceryList implementation
+    updateItemMutation.mutate(updatedItem, {
+      onSuccess: () => {
+        console.log("Update successful");
+        toast.success("Item updated");
+        refetch();
+        setEditingItem(null);
+      },
+      onError: (error) => {
+        console.error("Update error:", error);
+        toast.error("Failed to update item");
+      }
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, id: string) => {
